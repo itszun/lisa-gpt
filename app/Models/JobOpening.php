@@ -4,11 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Company extends Model
+class JobOpening extends Model
 {
     protected $fillable = [
-        'name',
-        'description',
+        'company_id',
+        'title',
+        'body',
+        'due_date',
         'status',
     ];
 
@@ -16,9 +18,8 @@ class Company extends Model
         'status' => 'integer',
     ];
 
-    public function jobOpenings()
+    public function company()
     {
-        return $this->hasMany(JobOpening::class);
+        return $this->belongsTo(Company::class);
     }
-
 }
