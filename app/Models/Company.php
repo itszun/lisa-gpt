@@ -21,4 +21,9 @@ class Company extends Model
         return $this->hasMany(JobOpening::class);
     }
 
+    public function properties()
+    {
+        return $this->hasMany(CompanyProperty::class);
+    }
+
 }
