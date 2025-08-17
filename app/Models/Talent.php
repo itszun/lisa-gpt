@@ -20,4 +20,8 @@ class Talent extends Model
         'educations' => 'json',
     ];
 
+    public function candidates()
+    {
+        return $this->hasMany(Candidate::class);
+    }
 }

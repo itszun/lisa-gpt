@@ -22,4 +22,9 @@ class JobOpening extends Model
     {
         return $this->belongsTo(Company::class);
     }
+
+    public function candidates()
+    {
+        return $this->hasMany(Candidate::class);
+    }
 }
