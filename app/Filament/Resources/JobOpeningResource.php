@@ -61,6 +61,7 @@ class JobOpeningResource extends Resource
                     ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('due_date')
+                    ->date('d-m-Y')
                     ->sortable()
                     ->searchable(),
                 Tables\Columns\TagsColumn::make('status')

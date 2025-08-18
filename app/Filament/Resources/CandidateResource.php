@@ -72,19 +72,27 @@ class CandidateResource extends Resource
                     ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('regist_at')
-                    ->default(fn ($record) => $record->regist_at ? $record->regist_at->format('d-m-Y H:i') : '-')
+                    ->date(fn ($record) => $record->regist_at ? 'd-m-Y H:i' : null)
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('interview_schedule')
-                    ->default(fn ($record) => $record->interview_schedule ? $record->interview_schedule->format('d-m-Y H:i') : '-')
+                    ->date(fn ($record) => $record->interview_schedule ? 'd-m-Y H:i' : null)
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('notified_at')
-                    ->default(fn ($record) => $record->notified_at ? $record->notified_at->format('d-m-Y H:i') : '-')
+                    ->date(fn ($record) => $record->notified_at ? 'd-m-Y H:i' : null)
                     ->searchable()
                     ->sortable(),
             ])
             ->filters([
+                Tables\Filters\SelectFilter::make('talent_id')
+                    ->relationship('talent', 'name')
+                    ->searchable()
+                    ->preload(),
+                Tables\Filters\SelectFilter::make('job_opening_id')
+                    ->relationship('jobOpening', 'title')
+                    ->searchable()
+                    ->preload(),
                 Tables\Filters\SelectFilter::make('status')
                     ->options([
                         1 => 'Active',
@@ -93,10 +101,14 @@ class CandidateResource extends Resource
                     ->label('Status'),
                 Tables\Filters\Filter::make('regist_at')
                     ->form([
-                        Forms\Components\DatePicker::make('from')
-                            ->label('Registered From'),
-                        Forms\Components\DatePicker::make('to')
-                            ->label('Registered To'),
+                        Forms\Components\Grid::make()
+                            ->schema([
+                                Forms\Components\DatePicker::make('from')
+                                    ->label('Registered From'),
+                                Forms\Components\DatePicker::make('to')
+                                    ->label('Registered To'),
+                            ])
+                            ->columns(2),
                     ])
                     ->query(function (Builder $query, array $data) {
                         return $query
@@ -105,10 +117,14 @@ class CandidateResource extends Resource
                     }),
                 Tables\Filters\Filter::make('interview_schedule')
                     ->form([
-                        Forms\Components\DatePicker::make('from')
-                            ->label('Interview Schedule From'),
-                        Forms\Components\DatePicker::make('to')
-                            ->label('Interview Schedule To'),
+                        Forms\Components\Grid::make()
+                            ->schema([
+                                Forms\Components\DatePicker::make('from')
+                                    ->label('Interview Schedule From'),
+                                Forms\Components\DatePicker::make('to')
+                                    ->label('Interview Schedule To'),
+                            ])
+                            ->columns(2),
                     ])
                     ->query(function (Builder $query, array $data) {
                         return $query
@@ -117,10 +133,14 @@ class CandidateResource extends Resource
                     }),
                 Tables\Filters\Filter::make('notified_at')
                     ->form([
-                        Forms\Components\DatePicker::make('from')
-                            ->label('Notified From'),
-                        Forms\Components\DatePicker::make('to')
-                            ->label('Notified To'),
+                        Forms\Components\Grid::make()
+                            ->schema([
+                                Forms\Components\DatePicker::make('from')
+                                    ->label('Notified From'),
+                                Forms\Components\DatePicker::make('to')
+                                    ->label('Notified To'),
+                            ])
+                            ->columns(2),
                     ])
                     ->query(function (Builder $query, array $data) {
                         return $query
