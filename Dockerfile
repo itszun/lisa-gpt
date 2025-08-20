@@ -15,15 +15,21 @@ RUN apk add --no-cache \
     libwebp-dev \
     libxml2-dev \
     gmp-dev \
+    oniguruma-dev \
+    icu-dev \
+    libpq \
+    libpq-dev \
     && docker-php-ext-install \
     zip \
-    pdo_mysql \
+    pdo \
+    pdo_pgsql \
     gd \
     mbstring \
     gmp \
     exif \
     bcmath \
     xml \
+    intl \
     && rm -rf /tmp/*
 
 # Install Composer from URL (cara yang lebih disarankan)
@@ -34,6 +40,8 @@ COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
 COPY ./docker/production/nginx/default.conf /etc/nginx/conf.d/default.conf
 
 # Copy the entire application directory into the image.
+RUN git config --global --add safe.directory /var/www/html
+
 COPY . /var/www/html
 
 # Set permissions and ownership for the application
@@ -41,9 +49,11 @@ RUN chown -R www-data:www-data /var/www/html
 RUN chmod -R 775 /var/www/html/storage
 RUN chmod -R 775 /var/www/html/bootstrap/cache
 
-# Switch to the non-privileged user
-RUN git config --global --add safe.directory /var/www/html
 USER www-data
+
+RUN composer update
+
+# Switch to the non-privileged user
 
 # Define default command for PHP-FPM
 CMD ["php-fpm"]
