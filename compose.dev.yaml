@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  # PHP-FPM service (handles backend PHP logic)
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development # This targets the 'development' stage in your Dockerfile
+    container_name: laravel-app
+    restart: unless-stopped
+    volumes:
+      - .:/var/www/html
+    ports:
+      - 9000:9000 # Expose PHP-FPM port if needed for debugging
+    networks:
+      - laravel_network
+    environment:
+      # Use .env file variables
+      - DB_CONNECTION=mysql
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_DATABASE=${DB_DATABASE}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+
+  # Nginx service (web server)
+  nginx:
+    image: nginx:alpine
+    container_name: laravel-nginx
+    restart: unless-stopped
+    ports:
+      - 80:80
+    volumes:
+      - .:/var/www/html
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
+    networks:
+      - laravel_network
+
+  # MySQL service (database)
+  db:
+    image: mysql:8.0
+    container_name: laravel-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - db_data:/var/lib/mysql
+    ports:
+      - 3306:3306
+    networks:
+      - laravel_network
+
+# Docker Networks
+networks:
+  laravel_network:
+    driver: bridge
+
+# Docker Volumes
+volumes:
+  db_data:
+    driver: local
