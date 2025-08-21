@@ -53,6 +53,8 @@ USER www-data
 
 RUN composer update
 
+RUN npm install && npm run build
+
 # Switch to the non-privileged user
 
 # Define default command for PHP-FPM
