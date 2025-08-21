@@ -52,7 +52,7 @@ RUN composer update
 
 RUN npm install && npm run build
 
-RUN php artisan migrate
+RUN yes | php artisan migrate
 
 RUN php artisan optimize:clear
 
