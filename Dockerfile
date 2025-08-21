@@ -44,17 +44,18 @@ RUN git config --global --add safe.directory /var/www/html
 
 COPY . /var/www/html
 
-USER www-data
-
 # Set permissions and ownership for the application
-RUN chmod -R 777 /var/www/html/storage
-RUN chmod -R 777 /var/www/html/bootstrap/cache
+RUN chmod -R 775 /var/www/html/storage
+RUN chmod -R 775 /var/www/html/bootstrap/cache
 
 RUN composer update
 
 RUN npm install && npm run build
 
-# Switch to the non-privileged user
+RUN php artisan migrate
 
-# Define default command for PHP-FPM
+RUN php artisan optimize:clear
+
+USER www-data
+
 CMD ["php-fpm"]
