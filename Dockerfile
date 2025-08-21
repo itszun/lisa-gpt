@@ -44,12 +44,11 @@ RUN git config --global --add safe.directory /var/www/html
 
 COPY . /var/www/html
 
-# Set permissions and ownership for the application
-RUN chown -R www-data:www-data /var/www/html
-RUN chmod -R 775 /var/www/html/storage
-RUN chmod -R 775 /var/www/html/bootstrap/cache
-
 USER www-data
+
+# Set permissions and ownership for the application
+RUN chmod -R 777 /var/www/html/storage
+RUN chmod -R 777 /var/www/html/bootstrap/cache
 
 RUN composer update
 
