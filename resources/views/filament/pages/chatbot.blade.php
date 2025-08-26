@@ -56,7 +56,7 @@
         x-data="chatApp({
             // set ke null untuk dummy reply; isi dengan route kalo udah ada backend, contoh:
             {{-- '{{ route('chatbot.ask') }}' --}}
-            endpoint: 'http://localhost:5000/api/chat',
+            endpoint: '{{ config('chatbot.endpoint') }}',
             persist: true, // simpan chat ke localStorage biar ga ke-reset
             user_id: '{{ Auth::user()->id }}'
         })"
