@@ -1,13 +1,67 @@
 <x-filament-panels::page>
+    <style>
+        .chat-container pre {
+            background-color: #2d2d2d; /* Warna gelap */
+            color: #f8f8f2; /* Warna teks terang */
+            padding: 1em;
+            border-radius: 5px;
+            overflow-x: auto; /* Agar bisa di-scroll kalau kode panjang */
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+            font-size: 0.9em;
+            line-height: 1.4;
+            margin-bottom: 1em;
+        }
+
+        .chat-container pre code {
+            display: block; /* Penting untuk menjaga padding dan line-height */
+        }
+
+        /* Untuk list */
+        .chat-container ul {
+            list-style: disc; /* Atau circle, square */
+            margin-left: 1.5em;
+            padding-left: 0;
+        }
+        .chat-container ol {
+            list-style: decimal;
+            margin-left: 1.5em;
+            padding-left: 0;
+        }
+        .chat-container li {
+            margin-bottom: 0.5em;
+        }
+
+        /* Untuk paragraf */
+        .chat-container p {
+            margin-bottom: 1em;
+            line-height: 1.6;
+        }
+
+        /* Untuk heading */
+        .chat-container h1, .chat-container h2, .chat-container h3, .chat-container h4, .chat-container h5, .chat-container h6 {
+            margin-top: 1.5em;
+            margin-bottom: 0.8em;
+            font-weight: bold;
+        }
+
+        /* Untuk bold dan italic */
+        .chat-container strong {
+            font-weight: bold;
+        }
+        .chat-container em {
+            font-style: italic;
+        }
+    </style>
     <div
         x-data="chatApp({
-            // set ke null untuk dummy reply; isi dengan route kalo udah ada backend, contoh: 
+            // set ke null untuk dummy reply; isi dengan route kalo udah ada backend, contoh:
             {{-- '{{ route('chatbot.ask') }}' --}}
-            endpoint: null,
+            endpoint: 'http://localhost:5000/api/chat',
             persist: true, // simpan chat ke localStorage biar ga ke-reset
+            user_id: '{{ Auth::user()->id }}'
         })"
         x-init="init()"
-        class="space-y-4"
+        class="space-y-4 chat-container"
     >
 
         <!-- Header kecil -->
@@ -57,7 +111,7 @@
                                 : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100'"
                         >
                             <div class="text-xs opacity-70 mb-1" x-text="m.sender === 'user' ? 'You' : 'Lisa'"></div>
-                            <div class="whitespace-pre-wrap leading-relaxed" x-text="m.text"></div>
+                            <div class="whitespace-pre-wrap leading-relaxed" x-html="m.text"></div>
 
                             <div class="flex items-center gap-2 mt-2 text-[11px] opacity-70">
                                 <span x-text="formatTime(m.at)"></span>
@@ -100,7 +154,7 @@
             ></textarea>
 
             <button
-                class="px-4 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
+                class="px-4 py-2 rounded-xl bg-blue-600 dark:text-white hover:bg-blue-700 disabled:opacity-50"
                 :disabled="loading || message.trim()===''"
                 @click="sendMessage()"
             >
@@ -108,12 +162,13 @@
             </button>
         </div>
     </div>
-
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script>
-        function chatApp({ endpoint = null, persist = true } = {}) {
+        function chatApp({ endpoint = null, persist = true, user_id = null } = {}) {
             return {
                 endpoint,
                 persist,
+                user_id,
                 messages: [],
                 message: '',
                 loading: false,
@@ -177,6 +232,7 @@
 
                 async sendMessage() {
                     const text = this.message.trim()
+                    const user_id = this.user_id
                     if (!text) return
 
                     // tampilkan pesan user
@@ -202,11 +258,15 @@
                                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '',
                                 'Accept': 'application/json',
                             },
-                            body: JSON.stringify({ message: text }),
+                            body: JSON.stringify({ message: text, session_id: user_id }),
                         })
                         if (!res.ok) throw new Error('Request failed')
                         const data = await res.json()
-                        this.push('Lisa', data.reply ?? '(no reply)')
+                        if(data.answer) {
+                            this.push('Lisa', marked.parse(data.answer))
+                        } else {
+                            this.push('Lisa', '(no reply)')
+                        }
                     } catch (e) {
                         this.push('Lisa', '⚠️ Gagal ambil jawaban dari server.')
                         console.error(e)
