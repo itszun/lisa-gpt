@@ -27,4 +27,18 @@ class Talent extends Model
     {
         return $this->hasMany(Candidate::class);
     }
+
+    public function companies()
+    {
+        return $this->hasManyThrough(
+            Company::class,
+            Candidate::class,
+            'talent_id',      // FK di candidates → talents.id
+            'id',             // PK di companies
+            'id',             // PK di talents
+            'job_opening_id'  // FK di candidates → job_openings.id
+        )
+        ->join('job_openings', 'candidates.job_opening_id', '=', 'job_openings.id')
+        ->select('companies.*');
+    }
 }

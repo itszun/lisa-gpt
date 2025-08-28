@@ -7,11 +7,17 @@ use Filament\Tables;
 use App\Models\Talent;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
+use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
+use Filament\Infolists\Components\Tabs;
 use Illuminate\Database\Eloquent\Builder;
+use Filament\Infolists\Components\Section;
+use Filament\Infolists\Components\Tabs\Tab;
+use Filament\Infolists\Components\TextEntry;
 use App\Filament\Resources\TalentResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\TalentResource\RelationManagers;
+use Icetalker\FilamentTableRepeatableEntry\Infolists\Components\TableRepeatableEntry;
 
 class TalentResource extends Resource
 {
@@ -85,6 +91,67 @@ class TalentResource extends Resource
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
+    }
+
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                Section::make('Talent Detail')
+                ->schema([
+                    TextEntry::make('name'),
+                    TextEntry::make('position'),
+                    TextEntry::make('birthdate')->date('d-M-Y'),
+                    TextEntry::make('summary'),
+                    TextEntry::make('skills'),
+                    TextEntry::make('educations'),
+                ])
+                ->columns(2),
+
+                Tabs::make('Candidate')
+                    ->tabs([
+                        Tab::make('Candidate')
+                            ->schema([
+                                TableRepeatableEntry::make('candidates')
+                                ->schema([
+                                    TextEntry::make('jobOpening.title')
+                                        ->label('Job Opening'),
+                                    TextEntry::make('regist_at')
+                                        ->date('d-M-Y'),
+                                    TextEntry::make('interview_schedule')
+                                        ->date('d-M-Y'),
+                                    TextEntry::make('notified_at')
+                                        ->date('d-M-Y'),
+                                    TextEntry::make('status')
+                                        ->getStateUsing(fn ($record) => $record->status == 1 ? 'Active' : 'Inactive')
+                                        ->badge()
+                                        ->colors([
+                                            'success' => fn ($state) => $state == 1,
+                                            'danger'  => fn ($state) => $state == 0,
+                                        ]),
+                                    TextEntry::make('id')
+                                        ->label('Detail')
+                                        ->url(fn ($record) => route('filament.admin.resources.candidates.view', $record->id))
+                                        // ->openUrlInNewTab()
+                                        ->formatStateUsing(fn () => 'View'),  
+                                ])
+                                ->columnSpan(2),
+                            ]),
+                        Tab::make('Companies')
+                            ->schema([
+                                TableRepeatableEntry::make('companies')
+                                ->schema([
+                                    TextEntry::make('name')
+                                        ->label('Company Name'),
+                                    TextEntry::make('description')
+                                        ->label('Company Description')
+                                        ->limit(50),
+                                ])
+                                ->columnSpan(2),
+                            ]),
+                    ])
+            ])
+            ->columns(1);
     }
 
     public static function getRelations(): array

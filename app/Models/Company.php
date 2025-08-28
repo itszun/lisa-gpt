@@ -29,4 +29,16 @@ class Company extends Model
         return $this->hasMany(CompanyProperty::class);
     }
 
+    public function candidates()
+    {
+        return $this->hasManyThrough(
+            Candidate::class,
+            JobOpening::class,
+            'company_id',
+            'job_opening_id',
+            'id',
+            'id' 
+        );
+    }
+
 }

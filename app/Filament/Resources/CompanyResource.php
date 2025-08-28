@@ -11,12 +11,14 @@ use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
 use Filament\Infolists\Components\Tabs;
 use Illuminate\Database\Eloquent\Builder;
+use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\Tabs\Tab;
 use Filament\Infolists\Components\TextEntry;
 use App\Filament\Resources\CompanyResource\Pages;
 use Filament\Infolists\Components\RepeatableEntry;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\CompanyResource\RelationManagers;
+use Icetalker\FilamentTableRepeatableEntry\Infolists\Components\TableRepeatableEntry;
 
 class CompanyResource extends Resource
 {
@@ -104,43 +106,76 @@ class CompanyResource extends Resource
     {
         return $infolist
             ->schema([
+                Section::make('Company Detail')
+                ->schema([
+                    TextEntry::make('name'),
+                    TextEntry::make('description'),
+                ])
+                ->columns(2),
+
                 Tabs::make('Company')
                     ->tabs([
                         Tab::make('Job Openings')
                             ->schema([
-                                // TableEntry::make('jobOpenings')
-                                // ->label('Job Openings')
-                                // ->columns([
-                                //     TextEntry::make('title')->label('Title'),
-                                //     TextEntry::make('body')->label('Body'),
-                                //     DateEntry::make('due_date')->label('Due Date'),
-                                //     BadgeEntry::make('status')
-                                //         ->label('Status')
-                                //         ->colors([
-                                //             '1' => 'Active',
-                                //             '0' => 'Inactive',
-                                //         ]),
-                                // ]),
+                                TableRepeatableEntry::make('jobOpenings')
+                                ->schema([
+                                    TextEntry::make('title'),
+                                    TextEntry::make('body')
+                                        ->limit(50),
+                                    TextEntry::make('due_date')
+                                        ->date('d-M-Y'),
+                                    TextEntry::make('status')
+                                        ->getStateUsing(fn ($record) => $record->status == 1 ? 'Active' : 'Inactive')
+                                        ->badge()
+                                        ->colors([
+                                            'success' => fn ($state) => $state == 1,
+                                            'danger'  => fn ($state) => $state == 0,
+                                        ]),
+                                    TextEntry::make('id')
+                                        ->label('Detail')
+                                        ->url(fn ($record) => route('filament.admin.resources.job-openings.view', $record->id))
+                                        // ->openUrlInNewTab()
+                                        ->formatStateUsing(fn () => 'View'),
+                                ])
+                                ->columnSpan(2),
                             ]),
                         Tab::make('Candidate')
                             ->schema([
-                                RepeatableEntry::make('candidates')
-                                    ->label('Candidates')
-                                    ->schema([
-                                        TextEntry::make('name')->label('Name'),
-                                        TextEntry::make('email')->label('Email'),
-                                    ]),
+                                TableRepeatableEntry::make('candidates')
+                                ->schema([
+                                    TextEntry::make('talent.name')
+                                        ->label('Talent'),
+                                    TextEntry::make('jobOpening.title')
+                                        ->label('Job Opening'),
+                                    TextEntry::make('regist_at')
+                                        ->date('d-M-Y'),
+                                    TextEntry::make('interview_schedule')
+                                        ->date('d-M-Y'),
+                                    TextEntry::make('notified_at')
+                                        ->date('d-M-Y'),
+                                    TextEntry::make('status')
+                                        ->getStateUsing(fn ($record) => $record->status == 1 ? 'Active' : 'Inactive')
+                                        ->badge()
+                                        ->colors([
+                                            'success' => fn ($state) => $state == 1,
+                                            'danger'  => fn ($state) => $state == 0,
+                                        ]),
+                                    TextEntry::make('id')
+                                        ->label('Detail')
+                                        ->url(fn ($record) => route('filament.admin.resources.candidates.view', $record->id))
+                                        // ->openUrlInNewTab()
+                                        ->formatStateUsing(fn () => 'View'),
+                                ])
+                                ->columnSpan(2),
                             ]),
                         Tab::make('Company Properties')
                             ->schema([
-                                RepeatableEntry::make('properties')
-                                    ->label('Properties')
-                                    ->schema([
-                                        TextEntry::make('key')->label('Key'),
-                                        TextEntry::make('value')->label('Value'),
-                                    ])
-                                    ->columns(1)
-                                    ->grid(2),
+                                TableRepeatableEntry::make('properties')
+                                ->schema([
+                                    TextEntry::make('key'),
+                                    TextEntry::make('value'),
+                                ])
+                                ->columnSpan(2),
                             ])
                             ->columns(1),
 

@@ -2,16 +2,22 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\CandidateResource\Pages;
-use App\Filament\Resources\CandidateResource\RelationManagers;
-use App\Models\Candidate;
 use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Forms\Form;
+use App\Models\Candidate;
 use Filament\Tables\Table;
+use Filament\Infolists\Infolist;
+use Filament\Resources\Resource;
+use Filament\Infolists\Components\Grid;
+use Filament\Infolists\Components\Tabs;
 use Illuminate\Database\Eloquent\Builder;
+use Filament\Infolists\Components\Section;
+use Filament\Infolists\Components\Tabs\Tab;
+use Filament\Infolists\Components\TextEntry;
+use App\Filament\Resources\CandidateResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Filament\Resources\CandidateResource\RelationManagers;
 
 class CandidateResource extends Resource
 {
@@ -157,6 +163,51 @@ class CandidateResource extends Resource
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
+            ]);
+    }
+
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                Grid::make(2)
+                    ->schema([
+                        Section::make('Talent Info')
+                            ->schema([
+                                TextEntry::make('talent.name')
+                                    ->label('Name')
+                                    ->url(fn ($record) => route('filament.admin.resources.talent.view', $record->talent_id))
+                                    ->color('primary'),
+                                TextEntry::make('jobOpening.title')
+                                    ->label('Job Opening')
+                                    ->url(fn ($record) => route('filament.admin.resources.job-openings.view', $record->job_opening_id))
+                                    ->color('primary'),
+                                TextEntry::make('talent.birthdate')
+                                    ->date('d M Y'),
+                                TextEntry::make('talent.summary')
+                                    ->label('Summary'),
+                            ])
+                            ->columns(2),
+
+                        Section::make('Additional Info')
+                            ->schema([
+                                TextEntry::make('regist_at')
+                                    ->dateTime()
+                                    ->label('Registered At')
+                                    ->hidden(fn ($record) => blank($record->regist_at)),
+
+                                TextEntry::make('interview_schedule')
+                                    ->dateTime()
+                                    ->label('Interview Schedule')
+                                    ->hidden(fn ($record) => blank($record->interview_schedule)),
+
+                                    TextEntry::make('notified_at')
+                                    ->dateTime()
+                                    ->label('Notified At')
+                                    ->hidden(fn ($record) => blank($record->notified_at)),
+                            ])
+                            ->columns(3),
+                    ]),
             ]);
     }
 

@@ -18,7 +18,7 @@ class JobOpeningFactory extends Factory
     public function definition(): array
     {
         return [
-            'company_id' => Company::factory(),
+            'company_id' => Company::inRandomOrder()->first()->id,
             'title' => fake()->randomElement([
                 'Backend Developer',
                 'Frontend Developer',

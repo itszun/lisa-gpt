@@ -18,7 +18,7 @@ class CompanyPropertyFactory extends Factory
     public function definition(): array
     {
         return [
-            'company_id' => Company::factory(),
+            'company_id' => Company::inRandomOrder()->first()->id,
             'key' => fake()->word(),
             'value' => fake()->word()
         ];

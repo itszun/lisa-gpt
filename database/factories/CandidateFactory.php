@@ -20,8 +20,8 @@ class CandidateFactory extends Factory
     public function definition(): array
     {
         return [
-            'talent_id' => Talent::factory(),
-            'job_opening_id' => JobOpening::factory(),
+            'talent_id' => Talent::inRandomOrder()->first()->id,
+            'job_opening_id' => JobOpening::inRandomOrder()->first()->id,
             'status' => fake()->randomElement([0, 1]),
             'regist_at' => fake()->dateTime(),
             'interview_schedule' => fake()->optional()->dateTimeBetween('+1 week', '+1 month'),
