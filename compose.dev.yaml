@@ -46,6 +46,8 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
       - db_data:/var/lib/postgresql/data
+      - ./docker/postgresql.conf:/var/lib/postgresql/data/postgresql.conf
+      - ./docker/pg_hba.conf:/var/lib/postgresql/data/pg_hba.conf
     ports:
       - 5432:5432
     networks:
