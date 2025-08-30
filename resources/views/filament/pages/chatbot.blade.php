@@ -1,5 +1,8 @@
-<x-filament-panels::page>
+<x-filament-panels::page style="overflow: hidden;">
     <style>
+        body{
+            overflow: hidden;
+        }
         .chat-container pre {
             background-color: #2d2d2d;
             color: #f8f8f2;
@@ -11,9 +14,7 @@
             line-height: 1.4;
             margin-bottom: 1em;
         }
-        .chat-container pre code {
-            display: block;
-        }
+        .chat-container pre code { display: block; }
         .chat-container ul { list-style: disc; margin-left: 1.5em; }
         .chat-container ol { list-style: decimal; margin-left: 1.5em; }
         .chat-container li { margin-bottom: 0.5em; }
@@ -50,10 +51,10 @@
             </div>
         </div>
 
-        <!-- Chat Box -->
+        <!-- Chat Box (scrollable) -->
         <div id="chat-box"
              class="h-[65vh] overflow-y-auto bg-white dark:bg-gray-900 rounded-2xl p-4 shadow border"
-             :class="compact ? 'p-3' : 'p-4'" wire:ignore>
+             :class="compact ? 'p-3' : 'p-4'" wire:ignore style="scrollbar-gutter: stable;max-height: 24%;">
             <template x-if="messages.length === 0">
                 <div class="text-center text-gray-500 dark:text-gray-400 mt-10">
                     Belum ada pesan, Yuk mulai tanya ke Lisa
@@ -107,7 +108,7 @@
                 placeholder="Tulis pesan & Enter buat kirim…"
                 class="flex-1 rounded-xl border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white resize-none p-3"
             ></textarea>
-            <button class="px-4 py-2 rounded-xl bg-blue-600 dark:text-white hover:bg-blue-700 disabled:opacity-50"
+            <button class="px-4 py-2 rounded-xl border bg-blue-600 dark:text-white hover:bg-blue-700 disabled:opacity-50"
                     :disabled="loading || message.trim()===''" @click="sendMessage()">Kirim</button>
         </div>
     </div>
@@ -135,19 +136,12 @@
                 push(sender,text){ this.messages.push({id:Date.now()+Math.random(),sender,text,at:new Date().toISOString()}); this.save(); this.$nextTick(()=>this.scrollToBottom()) },
                 scrollToBottom(){ const b=document.getElementById('chat-box'); if(b) b.scrollTop=b.scrollHeight },
 
-                // === Enter logic ===
+                // === Enter / Shift+Enter logic ===
                 handleEnter(e) {
                     if (e.shiftKey) {
-                        const start = e.target.selectionStart;
-                        const end = e.target.selectionEnd;
-                        this.message = this.message.substring(0, start) + "\n" + this.message.substring(end);
-                        this.$nextTick(() => {
-                            e.target.selectionStart = e.target.selectionEnd = start + 1;
-                            this.autoResize(e);
-                        });
-                    } else {
-                        this.sendMessage();
+                        return true; // biarin bikin baris baru
                     }
+                    this.sendMessage(); // Enter biasa = kirim pesan
                 },
 
                 async sendMessage() {
