@@ -1,7 +1,7 @@
 <x-filament-panels::page style="overflow: hidden;">
     <style>
         body{
-            overflow: hidden;
+            /* overflow: hidden; */
         }
         .chat-container pre {
             background-color: #2d2d2d;
