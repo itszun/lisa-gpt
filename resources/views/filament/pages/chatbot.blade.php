@@ -54,7 +54,7 @@
         <!-- Chat Box (scrollable) -->
         <div id="chat-box"
              class="h-[65vh] overflow-y-auto bg-white dark:bg-gray-900 rounded-2xl p-4 shadow border"
-             :class="compact ? 'p-3' : 'p-4'" wire:ignore style="scrollbar-gutter: stable;max-height: 24%;">
+             :class="compact ? 'p-3' : 'p-4'" wire:ignore style="scrollbar-gutter: stable;max-height: 50%;">
             <template x-if="messages.length === 0">
                 <div class="text-center text-gray-500 dark:text-gray-400 mt-10">
                     Belum ada pesan, Yuk mulai tanya ke Lisa
@@ -103,7 +103,7 @@
             <textarea
                 x-model="message"
                 @keydown.enter.prevent="handleEnter($event)"
-                @input="autoResize($event)"
+                {{-- @input="autoResize($event)" --}}
                 rows="1"
                 placeholder="Tulis pesan & Enter buat kirim…"
                 class="flex-1 rounded-xl border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white resize-none p-3"
@@ -132,7 +132,7 @@
                 toggleCompact() { this.compact = !this.compact },
                 formatTime(iso) { try { return new Date(iso).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) } catch { return '' } },
                 copy(t) { navigator.clipboard?.writeText(t) },
-                autoResize(e) { e.target.style.height='auto'; e.target.style.height=(e.target.scrollHeight)+'px' },
+                //autoResize(e) { e.target.style.height='auto'; e.target.style.height=(e.target.scrollHeight)+'px' },
                 push(sender,text){ this.messages.push({id:Date.now()+Math.random(),sender,text,at:new Date().toISOString()}); this.save(); this.$nextTick(()=>this.scrollToBottom()) },
                 scrollToBottom(){ const b=document.getElementById('chat-box'); if(b) b.scrollTop=b.scrollHeight },
 

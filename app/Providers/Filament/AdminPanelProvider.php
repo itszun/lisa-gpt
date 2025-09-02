@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use Filament\Pages;
+use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Panel;
 use Filament\Widgets;
 use Filament\PanelProvider;
@@ -37,6 +38,7 @@ class AdminPanelProvider extends PanelProvider
                 Pages\Dashboard::class,
             ])
             ->plugins([
+                FilamentShieldPlugin::make(),
                 ApiServicePlugin::make(),
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
