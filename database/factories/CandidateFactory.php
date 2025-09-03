@@ -23,6 +23,14 @@ class CandidateFactory extends Factory
             'talent_id' => Talent::inRandomOrder()->first()->id,
             'job_opening_id' => JobOpening::inRandomOrder()->first()->id,
             'status' => fake()->randomElement([0, 1]),
+            'screening' => fake()->randomElement([
+                'Kandidat sangat berpotensi dibidang yang dituju dan bisa langsung dihubungi untuk interview.',
+                'Kandidat memiliki pengalaman yang relevan dan dapat memberikan kontribusi yang signifikan.',
+                'Kandidat menunjukkan sikap yang baik dan mampu bekerja dalam tim.',
+                'Kandidat memiliki keterampilan komunikasi yang baik dan mampu beradaptasi dengan cepat.',
+                'Kandidat memiliki pemahaman yang baik tentang industri dan tren terkini.',
+                'Kandidat memiliki motivasi yang tinggi untuk belajar dan berkembang.'
+            ]),
             'regist_at' => fake()->dateTime(),
             'interview_schedule' => fake()->optional()->dateTimeBetween('+1 week', '+1 month'),
             'notified_at' => function (array $attributes) {

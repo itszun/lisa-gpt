@@ -25,9 +25,10 @@ class UpdateCandidateRequest extends FormRequest
 			'talent_id' => 'required',
 			'job_opening_id' => 'required',
 			'status' => 'required',
-			'regist_at' => 'required',
-			'interview_schedule' => 'required',
-			'notified_at' => 'required'
+            'screening' => 'nullable|json',
+			'regist_at' => 'nullable',
+			'interview_schedule' => 'nullable',
+			'notified_at' => 'nullable'
 		];
     }
 }
