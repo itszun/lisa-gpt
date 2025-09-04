@@ -22,7 +22,7 @@ class CandidateFactory extends Factory
         return [
             'talent_id' => Talent::inRandomOrder()->first()->id,
             'job_opening_id' => JobOpening::inRandomOrder()->first()->id,
-            'status' => fake()->randomElement([1, 2, 100, 200, 201, 202, 203, 901, 902, 903]),
+            'status' => fake()->randomElement([1, 2, 100, 101, 102, 201, 202, 203, 901, 902, 903]),
             'screening' => [
                 fake()->randomElements([
                     "Kandidat sangat berpotensi dibidang yang dituju dan bisa langsung dihubungi untuk interview.",
