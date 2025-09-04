@@ -1,8 +1,9 @@
 <x-filament-panels::page style="overflow: hidden;">
     <style>
-        body{
+        body {
             /* overflow: hidden; */
         }
+
         .chat-container pre {
             background-color: #2d2d2d;
             color: #f8f8f2;
@@ -14,127 +15,313 @@
             line-height: 1.4;
             margin-bottom: 1em;
         }
-        .chat-container pre code { display: block; }
-        .chat-container ul { list-style: disc; margin-left: 1.5em; }
-        .chat-container ol { list-style: decimal; margin-left: 1.5em; }
-        .chat-container li { margin-bottom: 0.5em; }
-        .chat-container p { margin-bottom: 1em; line-height: 1.6; }
-        .chat-container h1, .chat-container h2, .chat-container h3,
-        .chat-container h4, .chat-container h5, .chat-container h6 {
-            margin-top: 1.5em; margin-bottom: 0.8em; font-weight: bold;
+
+        .chat-container pre code {
+            display: block;
         }
-        .chat-container strong { font-weight: bold; }
-        .chat-container em { font-style: italic; }
+
+        .chat-container ul {
+            list-style: disc;
+            margin-left: 1.5em;
+        }
+
+        .chat-container ol {
+            list-style: decimal;
+            margin-left: 1.5em;
+        }
+
+        .chat-container li {
+            margin-bottom: 0.5em;
+        }
+
+        .chat-container p {
+            margin-bottom: 1em;
+            line-height: 1.6;
+        }
+
+        .chat-container h1,
+        .chat-container h2,
+        .chat-container h3,
+        .chat-container h4,
+        .chat-container h5,
+        .chat-container h6 {
+            margin-top: 1.5em;
+            margin-bottom: 0.8em;
+            font-weight: bold;
+        }
+
+        .chat-container strong {
+            font-weight: bold;
+        }
+
+        .chat-container em {
+            font-style: italic;
+        }
+
+        .sidebar_container {
+            display: flex;
+        }
+
+        .main {
+            flex: 0 0 80%;
+            /* background-color: #888; */
+            color: #fff;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        .sidebar {
+            flex: 0 0 20%;
+            /* background-color: #333;
+             */
+            /* background-color: #2d2d2d; */
+            color: #fff;
+            padding: 10px;
+            box-sizing: border-box;
+        }
     </style>
 
     <div
         x-data="chatApp({
-            endpoint: '{{ config('chatbot.endpoint') }}',
-            persist: true,
-            user_id: '{{ Auth::user()->id }}'
-        })"
+                        endpoint: '{{ config('chatbot.endpoint') }}',
+                        persist: true,
+                        user_id: '{{ Auth::user()->id }}',
+                    })"
         x-init="init()"
-        class="space-y-4 chat-container"
-    >
-        <!-- Header -->
-        <div class="flex items-center justify-between">
-            <div>
-                <h2 class="text-lg font-semibold">Lisa</h2>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Ada yang bisa kubantu? 😉</p>
-            </div>
-            <div class="flex items-center gap-2">
-                <button class="px-3 py-2 text-sm rounded-xl border hover:bg-gray-50 dark:hover:bg-gray-800"
-                        @click="toggleCompact()"
-                        x-text="compact ? 'Mode Normal' : 'Mode Compact'"></button>
-                <button class="px-3 py-2 text-sm rounded-xl border hover:bg-gray-50 dark:hover:bg-gray-800"
-                        @click="clearChat()" title="Hapus semua pesan">Clear</button>
-            </div>
-        </div>
+        class="space-y-4 chat-container">
 
-        <!-- Chat Box (scrollable) -->
-        <div id="chat-box"
-             class="h-[65vh] overflow-y-auto bg-white dark:bg-gray-900 rounded-2xl p-4 shadow border"
-             :class="compact ? 'p-3' : 'p-4'" wire:ignore style="scrollbar-gutter: stable;max-height: 50%;">
-            <template x-if="messages.length === 0">
-                <div class="text-center text-gray-500 dark:text-gray-400 mt-10">
-                    Belum ada pesan, Yuk mulai tanya ke Lisa
-                </div>
-            </template>
+        <div class="sidebar_container">
+            <div class="sidebar overflow-y-auto bg-white dark:bg-gray-900 rounded-2xl p-4 shadow border">
+                <button
+                    @click="openChat()"
+                    class="w-full text-left mt-1 px-3 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 transition button">
+                    New Chat
+                </button>
 
-            <template x-for="m in messages" :key="m.id">
-                <div class="mb-3 flex" :class="m.sender === 'user' ? 'justify-end' : 'justify-start'">
-                    <div class="flex items-start gap-2 max-w-[80%]">
-                        <template x-if="m.sender === 'Lisa'">
-                            <div class="shrink-0 w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 grid place-items-center">🤖</div>
-                        </template>
-                        <div class="p-3 rounded-2xl"
-                             :class="m.sender === 'user'
-                                 ? 'bg-gray-200 text-gray-900 dark:bg-gray-800 dark:text-gray-100'
-                                 : 'bg-gray-200 text-gray-900 dark:bg-gray-800 dark:text-gray-100'">
-                            <div class="text-xs opacity-70 mb-1" x-text="m.sender === 'user' ? 'You' : 'Lisa'"></div>
-                            <div class="whitespace-pre-wrap leading-relaxed" x-html="m.text"></div>
-                            <div class="flex items-center gap-2 mt-2 text-[11px] opacity-70">
-                                <span x-text="formatTime(m.at)"></span>
-                                <button class="underline" @click="copy(m.text)" title="Copy">Copy</button>
+                <h2 class="px-3 py-1 m-1 mb-3 text-gray-600 dark:text-gray-300 font-medium text-lg tracking-wide">
+                    History Chats
+                </h2>
+
+                @foreach($list_dummy_data['sessions'] as $sessionId)
+                <button
+                    @click="openChat('{{ $sessionId }}')"
+                    class="w-full text-left px-3 py-2 mb-2 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 transition">
+                    {{ $sessionId }}
+                </button>
+                @endforeach
+            </div>
+
+            <div class="main">
+                <div class="col-12 col-md-10 bg-secondary text-white p-3">
+
+                    <!-- Header -->
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h2 class="text-lg font-semibold">Lisa</h2>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Ada yang bisa kubantu? 😉</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button class="px-3 py-2 text-sm rounded-xl border hover:bg-gray-50 dark:hover:bg-gray-800"
+                                @click="toggleCompact()"
+                                x-text="compact ? 'Mode Normal' : 'Mode Compact'"></button>
+                            <button class="px-3 py-2 text-sm rounded-xl border hover:bg-gray-50 dark:hover:bg-gray-800"
+                                @click="clearChat()" title="Hapus semua pesan">Clear</button>
+                        </div>
+                    </div>
+
+                    <!-- Chat Box (scrollable) -->
+                    <div id="chat-box"
+                        class="h-[65vh] overflow-y-auto bg-white dark:bg-gray-900 rounded-2xl p-4 shadow border"
+                        :class="compact ? 'p-3' : 'p-4'" wire:ignore style="scrollbar-gutter: stable;max-height: 50%;" style="margin-bottom: 10px;">
+                        <template x-if="messages.length === 0">
+                            <div class="text-center text-gray-500 dark:text-gray-400 mt-10">
+                                Belum ada pesan, Yuk mulai tanya ke Lisa
                             </div>
-                        </div>
-                        <template x-if="m.sender === 'user'">
-                            <div class="shrink-0 w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/40 grid place-items-center">🧑‍💻</div>
+                        </template>
+
+                        <template x-for="m in messages" :key="m.id">
+                            <div class="mb-3 flex" :class="m.sender === 'user' ? 'justify-end' : 'justify-start'">
+                                <div class="flex items-start gap-2 max-w-[80%]">
+                                    <template x-if="m.sender === 'Lisa'">
+                                        <div class="shrink-0 w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 grid place-items-center">🤖</div>
+                                    </template>
+                                    <div class="p-3 rounded-2xl"
+                                        :class="m.sender === 'user'
+                                             ? 'bg-gray-200 text-gray-900 dark:bg-gray-800 dark:text-gray-100'
+                                             : 'bg-gray-200 text-gray-900 dark:bg-gray-800 dark:text-gray-100'" style="margin-bottom:10px">
+                                        <div class="text-xs opacity-70 mb-1" x-text="m.sender === 'user' ? 'You' : 'Lisa'"></div>
+                                        <div class="whitespace-pre-wrap leading-relaxed" x-html="m.text"></div>
+                                        <div class="flex items-center gap-2 mt-2 text-[11px] opacity-70">
+                                            <span x-text="formatTime(m.at)"></span>
+                                            <button class="underline" @click="copy(m.text)" title="Copy">Copy</button>
+                                        </div>
+                                    </div>
+                                    <template x-if="m.sender === 'user'">
+                                        <div class="shrink-0 w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/40 grid place-items-center">🧑‍💻</div>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
+
+                        <!-- Typing -->
+                        <template x-if="loading">
+                            <div class="mb-2 flex justify-start">
+                                <div class="flex items-center gap-2 max-w-[80%]">
+                                    <div class="shrink-0 w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 grid place-items-center">🤖</div>
+                                    <div class="px-3 py-2 rounded-2xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200">
+                                        <span class="animate-pulse">Lisa is typing…</span>
+                                    </div>
+                                </div>
+                            </div>
                         </template>
                     </div>
-                </div>
-            </template>
 
-            <!-- Typing -->
-            <template x-if="loading">
-                <div class="mb-2 flex justify-start">
-                    <div class="flex items-center gap-2 max-w-[80%]">
-                        <div class="shrink-0 w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 grid place-items-center">🤖</div>
-                        <div class="px-3 py-2 rounded-2xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200">
-                            <span class="animate-pulse">Lisa is typing…</span>
-                        </div>
+                    <!-- Input -->
+                    <div class="flex items-end gap-2" style="margin-top: 10px;">
+                        <textarea
+                            x-model="message"
+                            @keydown.enter.prevent="handleEnter($event)"
+                            {{-- @input="autoResize($event)" --}}
+                            rows="1"
+                            placeholder="Tulis pesan & Enter buat kirim…"
+                            class="flex-1 rounded-xl border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white resize-none p-3"></textarea>
+                        <button class="px-4 py-2 rounded-xl border bg-blue-600 dark:text-white hover:bg-blue-700 disabled:opacity-50"
+                            :disabled="loading || message.trim()===''" @click="sendMessage()">Kirim</button>
                     </div>
                 </div>
-            </template>
-        </div>
-
-        <!-- Input -->
-        <div class="flex items-end gap-2">
-            <textarea
-                x-model="message"
-                @keydown.enter.prevent="handleEnter($event)"
-                {{-- @input="autoResize($event)" --}}
-                rows="1"
-                placeholder="Tulis pesan & Enter buat kirim…"
-                class="flex-1 rounded-xl border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white resize-none p-3"
-            ></textarea>
-            <button class="px-4 py-2 rounded-xl border bg-blue-600 dark:text-white hover:bg-blue-700 disabled:opacity-50"
-                    :disabled="loading || message.trim()===''" @click="sendMessage()">Kirim</button>
+            </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script>
-        function chatApp({ endpoint = null, persist = true, user_id = null } = {}) {
+        var respon_chat = {
+            "ac82nc023kl": [{
+                    "actor": "system",
+                    "message": "Act as HR Assistant",
+                    "at": "2025-09-05T22:10:00.000Z"
+                },
+                {
+                    "actor": "user",
+                    "message": "Tolong carikan kandidat untuk perusahaan A.",
+                    "at": "2025-09-05T22:10:10.000Z"
+                },
+                {
+                    "actor": "Lisa",
+                    "message": "Baik, saya akan mencari kandidat sesuai kebutuhan perusahaan A. Apakah ada kriteria khusus?",
+                    "at": "2025-09-05T22:10:20.000Z"
+                },
+                {
+                    "actor": "user",
+                    "message": "Ya, harus punya pengalaman minimal 2 tahun.",
+                    "at": "2025-09-05T22:10:30.000Z"
+                },
+                {
+                    "actor": "Lisa",
+                    "message": "Baik, saya catat. Kandidat untuk perusahaan A harus berpengalaman minimal 2 tahun.",
+                    "at": "2025-09-05T22:10:40.000Z"
+                }
+            ],
+            "cvi10msd": [{
+                    "actor": "system",
+                    "message": "Act as HR Assistant",
+                    "at": "2025-09-05T22:15:00.000Z"
+                },
+                {
+                    "actor": "user",
+                    "message": "Sekarang carikan kandidat untuk perusahaan B dan C.",
+                    "at": "2025-09-05T22:15:10.000Z"
+                },
+                {
+                    "actor": "Lisa",
+                    "message": "Untuk perusahaan B, apakah ada preferensi khusus?",
+                    "at": "2025-09-05T22:15:20.000Z"
+                },
+                {
+                    "actor": "user",
+                    "message": "B perusahaan butuh kandidat fresh graduate.",
+                    "at": "2025-09-05T22:15:30.000Z"
+                },
+                {
+                    "actor": "Lisa",
+                    "message": "Dicatat. Untuk perusahaan C, bagaimana kriterianya?",
+                    "at": "2025-09-05T22:15:40.000Z"
+                },
+                {
+                    "actor": "user",
+                    "message": "C harus punya kemampuan manajerial.",
+                    "at": "2025-09-05T22:15:50.000Z"
+                },
+                {
+                    "actor": "Lisa",
+                    "message": "Oke, saya sudah catat kriteria kandidat untuk perusahaan B dan C.",
+                    "at": "2025-09-05T22:16:00.000Z"
+                }
+            ]
+        }
+
+        function chatApp({
+            endpoint = null,
+            persist = true,
+            user_id = null,
+        } = {}) {
             return {
-                endpoint, persist, user_id,
-                messages: [], message: '', loading: false, compact: false,
+                endpoint,
+                persist,
+                user_id,
+                messages: [],
+                message: '',
+                loading: false,
+                compact: false,
 
                 init() {
                     const saved = this.persist ? JSON.parse(localStorage.getItem('chatbot_messages') ?? '[]') : []
-                    this.messages = saved.length ? saved : [
-                        { id: Date.now(), sender: 'Lisa', text: 'Halo! 👋 Ada yang bisa ku bantu?', at: new Date().toISOString() }
-                    ]
+                    this.messages = saved.length ? saved : [{
+                        id: Date.now(),
+                        sender: 'Lisa',
+                        text: 'Halo! 👋 Ada yang bisa ku bantu?',
+                        at: new Date().toISOString()
+                    }]
                     this.$nextTick(() => this.scrollToBottom())
                 },
-                save() { if (this.persist) localStorage.setItem('chatbot_messages', JSON.stringify(this.messages)) },
-                clearChat() { this.messages = []; this.save() },
-                toggleCompact() { this.compact = !this.compact },
-                formatTime(iso) { try { return new Date(iso).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) } catch { return '' } },
-                copy(t) { navigator.clipboard?.writeText(t) },
+                save() {
+                    if (this.persist) localStorage.setItem('chatbot_messages', JSON.stringify(this.messages))
+                },
+                clearChat() {
+                    this.messages = [];
+                    this.save()
+                },
+                toggleCompact() {
+                    this.compact = !this.compact
+                },
+                formatTime(iso) {
+                    try {
+                        return new Date(iso).toLocaleTimeString([], {
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        })
+                    } catch {
+                        return ''
+                    }
+                },
+                copy(t) {
+                    navigator.clipboard?.writeText(t)
+                },
                 //autoResize(e) { e.target.style.height='auto'; e.target.style.height=(e.target.scrollHeight)+'px' },
-                push(sender,text){ this.messages.push({id:Date.now()+Math.random(),sender,text,at:new Date().toISOString()}); this.save(); this.$nextTick(()=>this.scrollToBottom()) },
-                scrollToBottom(){ const b=document.getElementById('chat-box'); if(b) b.scrollTop=b.scrollHeight },
+                push(sender, text, at = new Date().toISOString()) {
+                    this.messages.push({
+                        id: Date.now() + Math.random(),
+                        sender,
+                        text,
+                        at: at
+                    });
+                    this.save();
+                    this.$nextTick(() => this.scrollToBottom())
+                },
+                scrollToBottom() {
+                    const b = document.getElementById('chat-box');
+                    if (b) b.scrollTop = b.scrollHeight
+                },
 
                 // === Enter / Shift+Enter logic ===
                 handleEnter(e) {
@@ -142,6 +329,18 @@
                         return true; // biarin bikin baris baru
                     }
                     this.sendMessage(); // Enter biasa = kirim pesan
+                },
+
+                openChat(data = null) {
+                    this.clearChat();
+                    if (data !== null) {
+                        respon_chat[data].forEach(m => {
+                            if (m.actor === 'system') return;
+                            this.push(m.actor, m.message, m.at);
+                        });
+                    } else {
+                        this.push("Lisa", 'Halo! 👋 Ada yang bisa ku bantu?')
+                    }
                 },
 
                 async sendMessage() {
@@ -166,7 +365,10 @@
                                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '',
                                 'Accept': 'application/json',
                             },
-                            body: JSON.stringify({ message: text, session_id: this.user_id }),
+                            body: JSON.stringify({
+                                message: text,
+                                session_id: this.user_id
+                            }),
                         })
                         if (!res.ok) throw new Error('Request failed')
                         const data = await res.json()
