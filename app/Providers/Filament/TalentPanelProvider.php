@@ -25,8 +25,9 @@ class TalentPanelProvider extends PanelProvider
         return $panel
             ->id('talent')
             ->path('talent')
+            ->spa()
             ->colors([
-                'primary' => Color::Amber,
+                'primary' => Color::Emerald,
             ])
             ->discoverResources(in: app_path('Filament/Talent/Resources'), for: 'App\\Filament\\Talent\\Resources')
             ->discoverPages(in: app_path('Filament/Talent/Pages'), for: 'App\\Filament\\Talent\\Pages')
