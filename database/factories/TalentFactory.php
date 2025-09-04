@@ -61,6 +61,7 @@ class TalentFactory extends Factory
                     'Universitas Hasanuddin',
                 ]),
             ],
+            'status' => fake()->randomElement([1, 2, 100, 200, 300]),
         ];
     }
 }

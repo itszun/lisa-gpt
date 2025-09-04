@@ -23,6 +23,7 @@ class Candidate extends Model
         'regist_at' => 'datetime',
         'interview_schedule' => 'datetime',
         'notified_at' => 'datetime',
+        'screening' => 'json',
     ];
 
     public function talent()

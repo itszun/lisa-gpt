@@ -43,6 +43,14 @@ class TalentResource extends Resource
                     ->required(),
                 Forms\Components\TagsInput::make('educations')
                     ->required(),
+                Forms\Components\Select::make('status')
+                    ->options([
+                        1 => 'Draft',
+                        2 => 'Reviewed',
+                        100 => 'Listed',
+                        200 => 'Unlisted',
+                        300 => 'Blacklisted',
+                    ])->required(),
             ]);
     }
 

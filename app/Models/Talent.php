@@ -16,11 +16,13 @@ class Talent extends Model
         'summary',
         'skills',
         'educations',
+        'status',
     ];
 
     protected $casts = [
         'skills' => 'json',
         'educations' => 'json',
+        'status' => 'integer',
     ];
 
     public function candidates()

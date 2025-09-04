@@ -41,8 +41,17 @@ class CandidateResource extends Resource
                     ->required(),
                 Forms\Components\Select::make('status')
                     ->options([
-                        1 => 'Active',
-                        2 => 'Inactive',
+                        1 => 'Draft',
+                        2 => 'Scouting',
+                        100 => 'Screening',
+                        101 => 'Finished Assesment',
+                        102 => 'Interview',
+                        201 => 'Shortlisted',
+                        202 => 'Offering',
+                        203 => 'Contract Accepted',
+                        901 => 'Disinterest',
+                        902 => 'Eliminated',
+                        903 => 'Rejection'
                     ])
                     ->required(),
                 Forms\Components\DateTimePicker::make('regist_at')
@@ -70,10 +79,35 @@ class CandidateResource extends Resource
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TagsColumn::make('status')
-                    ->getStateUsing(fn ($record) => $record->status == 1 ? ['Active'] : ['Inactive'])
+                    // ->getStateUsing(fn ($record) => $record->status == 1 ? ['Active'] : ['Inactive'])
+                    // ->colors([
+                    //     'success' => fn ($state) => in_array('Active', $state),
+                    //     'danger' => fn ($state) => in_array('Inactive', $state),
+                    // ])
+                    ->getStateUsing(fn ($record) => match ($record->status) {
+                            1 => 'Draft',
+                            2 => 'Scouting',
+                            100 => 'Screening',
+                            101 => 'Finished Assesment',
+                            102 => 'Interview',
+                            201 => 'Shortlisted',
+                            202 => 'Offering',
+                            203 => 'Contract Accepted',
+                            901 => 'Disinterest',
+                            902 => 'Eliminated',
+                            903 => 'Rejection',
+                    })
+                    // ->badge()
+                    // ->color(fn (string $state): string => match ($state) {
+                    //     'draft' => 'gray',
+                    //     'reviewing' => 'warning',
+                    //     'published' => 'success',
+                    //     'rejected' => 'danger',
+                    // })
                     ->colors([
-                        'success' => fn ($state) => in_array('Active', $state),
-                        'danger' => fn ($state) => in_array('Inactive', $state),
+                        'success' => fn ($state) => in_array( $state, ['Shortlisted', 'Offering', 'Contract Accepted']),
+                        'warning' => fn ($state) => in_array( $state, ['Draft', 'Scouting', 'Screening', 'Finished Assesment', 'Interview']),
+                        'danger' => fn ($state) => in_array( $state, ['Disinterest', 'Eliminated', 'Rejection']),
                     ])
                     ->sortable()
                     ->searchable(),
@@ -101,8 +135,17 @@ class CandidateResource extends Resource
                     ->preload(),
                 Tables\Filters\SelectFilter::make('status')
                     ->options([
-                        1 => 'Active',
-                        2 => 'Inactive',
+                        1 => 'Draft',
+                        2 => 'Scouting',
+                        100 => 'Screening',
+                        101 => 'Finished Assesment',
+                        102 => 'Interview',
+                        201 => 'Shortlisted',
+                        202 => 'Offering',
+                        203 => 'Contract Accepted',
+                        901 => 'Disinterest',
+                        902 => 'Eliminated',
+                        903 => 'Rejection'
                     ])
                     ->label('Status'),
                 Tables\Filters\Filter::make('regist_at')
