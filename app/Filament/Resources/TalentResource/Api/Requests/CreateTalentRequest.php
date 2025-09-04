@@ -27,7 +27,8 @@ class CreateTalentRequest extends FormRequest
 			'birthdate' => 'required|date',
 			'summary' => 'required|string',
 			'skills' => 'required',
-			'educations' => 'required'
+			'educations' => 'required',
+            'status' => 'required|integer|default:1',
 		];
     }
 }

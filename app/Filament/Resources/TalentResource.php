@@ -105,6 +105,16 @@ class TalentResource extends Resource
                     TextEntry::make('summary'),
                     TextEntry::make('skills'),
                     TextEntry::make('educations'),
+                    TextEntry::make('status')
+                        ->getStateUsing(fn ($record) => $record->status = match ($record->status) {
+                            1 => 'Draft',
+                            2 => 'Reviewed',
+                            100 => 'Listed',
+                            200 => 'Unlisted',
+                            300 => 'Blacklisted',
+                            default => 'Unknown',
+                        })
+                        ->badge(),
                 ])
                 ->columns(2),
 
