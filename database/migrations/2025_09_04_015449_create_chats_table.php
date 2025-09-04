@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('session_id')->nullable();
             $table->foreignId('user_id')->constrained()->onDelete('cascade')->nullable();
+            $table->string('context')->nullable();
             $table->text('message')->nullable();
             $table->json('response')->nullable();
             $table->timestamps();
