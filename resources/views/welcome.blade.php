@@ -33,7 +33,7 @@
 						<div class="hero-copy">
 	                        <h1 class="hero-title mt-0">Lisa: The future HR is here </h1>
 	                        <p class="hero-paragraph">Lisa helps HR teams automate routine tasks, from talent scouting to acquisition, so they can focus on what matters most: your people.</p>
-	                        <div class="hero-cta"><a class="button button-primary" href="#">Request Demo</a><a class="button" href="#">Learn more</a></div>
+	                        <div class="hero-cta"><a class="button button-primary" href={{route("filament.company.auth.login")}}>Find my best talent!</a><a class="button" href={{route("filament.talent.auth.login")}}>I am a Talent</a></div>
 						</div>
 						<div class="hero-figure anime-element">
 							<svg class="placeholder" width="528" height="396" viewBox="0 0 528 396">
