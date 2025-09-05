@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
+use BezhanSalleh\FilamentShield\Traits\HasPanelShield;
 use Filament\Panel;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
@@ -15,7 +16,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 class User extends Authenticatable implements FilamentUser
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasApiTokens, HasRoles;
+    use HasFactory, Notifiable, HasApiTokens, HasRoles, HasPanelShield;
 
     /**
      * The attributes that are mass assignable.
@@ -53,6 +54,21 @@ class User extends Authenticatable implements FilamentUser
 
     public function canAccessPanel(Panel $panel): bool
     {
-        return true;
+        // Super admin hanya boleh masuk panel 'admin'
+        if ($this->hasRole('super_admin')) {
+            return $panel->getId() === 'admin';
+        }
+
+        // Talent user hanya boleh ke talent panel
+        if ($this->hasRole('talent')) {
+            return $panel->getId() === 'talent';
+        }
+
+        // Company user hanya boleh ke company panel
+        if ($this->hasRole('company')) {
+            return $panel->getId() === 'company';
+        }
+
+        return false;
     }
 }
