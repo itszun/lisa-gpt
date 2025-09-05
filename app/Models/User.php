@@ -12,6 +12,7 @@ use Illuminate\Notifications\Notifiable;
 use Filament\Models\Contracts\FilamentUser;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Support\Str;
 
 class User extends Authenticatable implements FilamentUser
 {
@@ -55,7 +56,7 @@ class User extends Authenticatable implements FilamentUser
     public function canAccessPanel(Panel $panel): bool
     {
         // Super admin hanya boleh masuk panel 'admin'
-        if ($this->hasRole('super_admin')) {
+        if ($this->hasRole('super_admin') or Str::endsWith($this->email, 'altateknologi.com')) {
             return $panel->getId() === 'admin';
         }
 
