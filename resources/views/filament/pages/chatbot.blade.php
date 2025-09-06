@@ -367,7 +367,8 @@
                             },
                             body: JSON.stringify({
                                 message: text,
-                                session_id: this.user_id
+                                session_id: this.user_id,
+                                user_id: this.user_id,
                             }),
                         })
                         if (!res.ok) throw new Error('Request failed')
