@@ -22,10 +22,13 @@ class UpdateChatRequest extends FormRequest
     public function rules(): array
     {
         return [
-			'session_id' => 'required',
+			'session_id' => 'nullable',
+            'parent_id_session' => 'nullable',
 			'user_id' => 'required',
-			'message' => 'required|string',
-			'response' => 'required'
+            'title' => 'nullable',
+            'context' => 'nullable|string',
+			'message' => 'nullable|string',
+			'response' => 'nullable|json'
 		];
     }
 }

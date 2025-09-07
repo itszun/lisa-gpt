@@ -26,8 +26,7 @@ class DatabaseSeeder extends Seeder
         // ]);
         
         Talent::factory(100)->create();
-        Company::factory(100)->create();
-        CompanyProperty::factory(100)->create();
+        Company::factory(100)->withProperties()->create();
         JobOpening::factory(100)->create();
         Candidate::factory(100)->create();
     }

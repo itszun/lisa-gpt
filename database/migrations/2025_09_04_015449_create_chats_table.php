@@ -14,7 +14,9 @@ return new class extends Migration
         Schema::create('chats', function (Blueprint $table) {
             $table->id();
             $table->string('session_id')->nullable();
+            $table->string('parent_id_session')->nullable();
             $table->foreignId('user_id')->constrained()->onDelete('cascade')->nullable();
+            $table->string('title')->nullable();
             $table->string('context')->nullable();
             $table->text('message')->nullable();
             $table->json('response')->nullable();

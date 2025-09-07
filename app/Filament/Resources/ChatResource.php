@@ -19,13 +19,36 @@ class ChatResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static bool $shouldRegisterNavigation = false;
+    protected static bool $shouldRegisterNavigation = true;
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                //
+                Forms\Text::make('session_id')
+                    ->label('Session ID')
+                    ->maxLength(255),
+                Forms\Text::make('parent_id_session')
+                    ->label('Parent ID Session')
+                    ->maxLength(255),
+                Forms\Select::make('user_id')
+                    ->label('User')
+                    ->relationship('user', 'name')
+                    ->searchable()
+                    ->preload()
+                    ->nullable(),
+                Forms\Text::make('title')
+                    ->maxLength(255)
+                    ->nullable(),
+                Forms\Textarea::make('context')
+                    ->rows(3)
+                    ->maxLength(65535),
+                Forms\Textarea::make('message')
+                    ->rows(3)
+                    ->maxLength(65535),
+                Forms\Textarea::make('response')
+                    ->rows(3)
+                    ->maxLength(65535),
             ]);
     }
 
@@ -33,13 +56,29 @@ class ChatResource extends Resource
     {
         return $table
             ->columns([
-                //
+                Tables\Columns\TextColumn::make('session_id')
+                    ->label('Session ID')
+                    ->limit(50),
+                Tables\Columns\TextColumn::make('parent_id_session')
+                    ->label('Parent ID Session')
+                    ->limit(50),
+                Tables\Columns\TextColumn::make('user.name')
+                    ->label('User'),
+                Tables\Columns\TextColumn::make('title')
+                    ->limit(50),
+                Tables\Columns\TextColumn::make('context')
+                    ->limit(50),
+                Tables\Columns\TextColumn::make('message')
+                    ->limit(50),
+                Tables\Columns\TextColumn::make('response')
+                    ->limit(50),
             ])
             ->filters([
                 //
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
