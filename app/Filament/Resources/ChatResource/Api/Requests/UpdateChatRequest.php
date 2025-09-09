@@ -25,10 +25,12 @@ class UpdateChatRequest extends FormRequest
 			'session_id' => 'nullable',
             'parent_id_session' => 'nullable',
 			'user_id' => 'required',
+            'identifier' => 'nullable', // format : user_id@user_name
             'title' => 'nullable',
             'context' => 'nullable|string',
 			'message' => 'nullable|string',
-			'response' => 'nullable|json'
+			'response' => 'nullable|json',
+            'created_by' => 'nullable',
 		];
     }
 }

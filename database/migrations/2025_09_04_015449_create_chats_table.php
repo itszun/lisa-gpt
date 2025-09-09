@@ -16,10 +16,12 @@ return new class extends Migration
             $table->string('session_id')->nullable();
             $table->string('parent_id_session')->nullable();
             $table->foreignId('user_id')->constrained()->onDelete('cascade')->nullable();
+            $table->string('identifier')->nullable(); // format : user_id@user_name
             $table->string('title')->nullable();
             $table->string('context')->nullable();
             $table->text('message')->nullable();
             $table->json('response')->nullable();
+            $table->foreignId('created_by')->constrained('users')->onDelete('cascade')->nullable();
             $table->timestamps();
         });
     }
