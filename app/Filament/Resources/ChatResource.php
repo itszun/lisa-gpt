@@ -25,30 +25,36 @@ class ChatResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Text::make('session_id')
+                Forms\Components\TextInput::make('session_id')
                     ->label('Session ID')
                     ->maxLength(255),
-                Forms\Text::make('parent_id_session')
+                Forms\Components\TextInput::make('parent_id_session')
                     ->label('Parent ID Session')
                     ->maxLength(255),
-                Forms\Select::make('user_id')
+                Forms\Components\Select::make('user_id')
                     ->label('User')
                     ->relationship('user', 'name')
                     ->searchable()
                     ->preload()
                     ->nullable(),
-                Forms\Text::make('title')
+                Forms\Components\TextInput::make('title')
                     ->maxLength(255)
                     ->nullable(),
-                Forms\Textarea::make('context')
+                Forms\Components\Textarea::make('context')
                     ->rows(3)
                     ->maxLength(65535),
-                Forms\Textarea::make('message')
+                Forms\Components\Textarea::make('message')
                     ->rows(3)
                     ->maxLength(65535),
-                Forms\Textarea::make('response')
+                Forms\Components\Textarea::make('response')
                     ->rows(3)
                     ->maxLength(65535),
+                Forms\Components\Select::make('created_by')
+                    ->label('Created By')
+                    ->relationship('createdByUser', 'name')
+                    ->searchable()
+                    ->preload()
+                    ->nullable(),
             ]);
     }
 

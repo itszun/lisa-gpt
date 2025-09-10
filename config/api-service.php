@@ -1,5 +1,7 @@
 <?php
 
+use App\Filament\Resources\BulkCandidateServiceResource\Api\Handlers\BulkCandidateServiceHandler;
+
 return [
     'navigation' => [
         'token' => [
@@ -35,4 +37,9 @@ return [
         // Add any additional middleware you want to apply to the logout route
     ],
     'use-spatie-permission-middleware' => false,
+    'prefix' => 'api',
+    'middleware' => ['api'],
+    'handlers' => [
+        BulkCandidateServiceHandler::class,
+    ],
 ];
