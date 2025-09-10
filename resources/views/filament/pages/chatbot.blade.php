@@ -1,11 +1,11 @@
 <x-filament-panels::page>
     <div x-data="chatApp(
-        '01@malik'
+        '{{ $user_id }}'
     )" class="h-[calc(100vh-12rem)] flex gap-4">
         <div class="transition-all duration-300 ease-in-out" :class="isCompact ? 'w-24' : 'w-1/4'">
-            <div class="h-full flex flex-col p-4 rounded-lg bg-white shadow dark:bg-gray-800">
+            <div class="max-h-screen overflow-y-auto h-full flex flex-col p-2 rounded-lg bg-white shadow dark:bg-gray-800">
                 <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-xl font-bold dark:text-gray-100" x-show="!isCompact">History Chats</h2>
+                    <h2 class="text-xl font-bold dark:text-gray-100" x-show="!isCompact">{{$user_id}}</h2>
                     <button @click="isCompact = !isCompact"
                         class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-400">
                         <svg x-show="!isCompact" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -30,13 +30,13 @@
                 <div class="flex-1 overflow-y-auto space-y-2">
                     <template x-for="chat in chatList" :key="chat.session_id">
                         <div class="cursor-pointer py-2 px-3 rounded-md transition-colors duration-200"
-                            @click="loadChat('01@malik', chat.session_id)"
+                            @click="loadChat(user_id, chat.session_id)"
                             :class="{
                                  'bg-gray-700 text-gray-100': chat.session_id === activeChatId,
                                  'hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300': chat.id !== activeChatId }">
                             <div x-show="!isCompact" class="font-medium text-sm" x-text="chat.title"></div>
                             {{-- <div x-show="!isCompact" class="text-xs truncate opacity-75" x-text="chat.session_id"></div> --}}
-                            <div x-show="isCompact" class="text-center" x-text="chat.session_id"></div>
+                            <div x-show="isCompact" class="text-center" x-text="chat.title.charAt(0)"></div>
                         </div>
                     </template>
                 </div>
@@ -51,7 +51,8 @@
                 <template x-for="message, key in messages" :key="key">
                     <div class="flex" :class="[
                         message.role === 'user' ? 'justify-end' : 'justify-start',
-                        message.role === 'system' ? 'hidden' : '',
+                        ['system','tool'].includes(message.role) ? 'hidden' : '',
+                        message.content === null ? 'hidden' : '',
                         ]">
                         <div class="max-w-xl px-4 py-2 rounded-lg"
                             :class="message.role === 'user' ?
@@ -78,11 +79,12 @@
             </form>
         </div>
     </div>
+    <input type="hidden" id="CHAT_BASE_URL" name="CHAT_BASE_URL" value="{{$chat_base_url}}">
 </x-filament-panels::page>
 <script src="https://cdn.jsdelivr.net/npm/marked/lib/marked.umd.js"></script>
 <script>
     const ChatAPI = {
-        baseUrl: "http://localhost:5000",
+        baseUrl: document.getElementById('CHAT_BASE_URL').value,
         async GetSessionMessages(user_id, session_id) {
             return await fetch(this.baseUrl + "/api/session/messages" +
                 `?user=${user_id}&session_id=${session_id}`)
@@ -155,14 +157,14 @@
             },
 
             // Fetch daftar chat dari API
-            async fetchChatList() {
+            async fetchChatList(select = null) {
                 try {
                     const response = await ChatAPI.GetSession(this.user_id).then(response =>
                         response.json())
                     this.chatList = response.sessions
                     console.log(this.chatList, response)
                     if (this.chatList.length > 0) {
-                        this.loadChat(this.user_id, null); // Load chat pertama secara default
+                        this.loadChat(this.user_id, select); // Load chat pertama secara default
                     }
                 } catch (error) {
                     console.error('Error fetching chat list:', error);
@@ -188,7 +190,7 @@
                 }
                 try {
                     const response = await ChatAPI.GetSessionMessages(user_id, session_id)
-                        .then(response => response.json()); // Ganti dengan endpoint API lo
+                        .then(response => response.json());
                     this._cacheMessages[session_id] = response.messages;
                     this.messages = []
                     this.messages = this._cacheMessages[session_id]
@@ -221,8 +223,7 @@
 
                     if (response.answer) {
                         if(response.new_session_id) {
-                            this.loadChat(this.user_id, response.new_session_id)
-                            this.fetchChatList()
+                            this.fetchChatList(response.new_session_id)
                             return
                         }
                         const newMessage = response.answer

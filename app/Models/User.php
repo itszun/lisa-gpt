@@ -77,4 +77,9 @@ class User extends Authenticatable implements FilamentUser
     {
         return $this->hasMany(Chat::class);
     }
+
+    public function getChatUserIdAttribute()
+    {
+        return $this->id."@".Str::snake($this->name);
+    }
 }
