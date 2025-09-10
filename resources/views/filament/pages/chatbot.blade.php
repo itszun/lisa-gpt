@@ -1,387 +1,242 @@
-<x-filament-panels::page style="overflow: hidden;">
-    <style>
-        body {
-            /* overflow: hidden; */
-        }
-
-        .chat-container pre {
-            background-color: #2d2d2d;
-            color: #f8f8f2;
-            padding: 1em;
-            border-radius: 5px;
-            overflow-x: auto;
-            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
-            font-size: 0.9em;
-            line-height: 1.4;
-            margin-bottom: 1em;
-        }
-
-        .chat-container pre code {
-            display: block;
-        }
-
-        .chat-container ul {
-            list-style: disc;
-            margin-left: 1.5em;
-        }
-
-        .chat-container ol {
-            list-style: decimal;
-            margin-left: 1.5em;
-        }
-
-        .chat-container li {
-            margin-bottom: 0.5em;
-        }
-
-        .chat-container p {
-            margin-bottom: 1em;
-            line-height: 1.6;
-        }
-
-        .chat-container h1,
-        .chat-container h2,
-        .chat-container h3,
-        .chat-container h4,
-        .chat-container h5,
-        .chat-container h6 {
-            margin-top: 1.5em;
-            margin-bottom: 0.8em;
-            font-weight: bold;
-        }
-
-        .chat-container strong {
-            font-weight: bold;
-        }
-
-        .chat-container em {
-            font-style: italic;
-        }
-
-        .sidebar_container {
-            display: flex;
-        }
-
-        .main {
-            flex: 0 0 80%;
-            /* background-color: #888; */
-            color: #fff;
-            padding: 10px;
-            box-sizing: border-box;
-        }
-
-        .sidebar {
-            flex: 0 0 20%;
-            /* background-color: #333;
-             */
-            /* background-color: #2d2d2d; */
-            color: #fff;
-            padding: 10px;
-            box-sizing: border-box;
-        }
-    </style>
-
+<x-filament-panels::page>
     <div
-        x-data="chatApp({
-                        endpoint: '{{ config('chatbot.endpoint') }}',
-                        persist: true,
-                        user_id: '{{ Auth::user()->id }}',
-                    })"
-        x-init="init()"
-        class="space-y-4 chat-container">
-
-        <div class="sidebar_container">
-            <div class="sidebar overflow-y-auto bg-white dark:bg-gray-900 rounded-2xl p-4 shadow border">
-                <button
-                    @click="openChat()"
-                    class="w-full text-left mt-1 px-3 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 transition button">
-                    New Chat
+        x-data="chatApp()"
+        class="h-[calc(100vh-12rem)] flex gap-4"
+    >
+        <div
+            class="transition-all duration-300 ease-in-out"
+            :class="isCompact ? 'w-24' : 'w-1/4'"
+        >
+            <div class="h-full flex flex-col p-4 rounded-lg bg-white shadow dark:bg-gray-800">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-bold dark:text-gray-100" x-show="!isCompact">History Chats</h2>
+                    <button @click="isCompact = !isCompact" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-400">
+                        <svg x-show="!isCompact" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M18.75 16.5L12 10.5L5.25 16.5" />
+                        </svg>
+                        <svg x-show="isCompact" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 5.25v13.5m0 0l-5.25-5.25M12 18.75l5.25-5.25" />
+                        </svg>
+                    </button>
+                </div>
+                <button @click="newChat()" class="px-4 py-2 mb-4 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 transition-colors duration-200">
+                    <span x-show="!isCompact">New Chat</span>
+                    <svg x-show="isCompact" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
                 </button>
-
-                <h2 class="px-3 py-1 m-1 mb-3 text-gray-600 dark:text-gray-300 font-medium text-lg tracking-wide">
-                    History Chats
-                </h2>
-
-                @foreach($list_dummy_data['sessions'] as $sessionId)
-                <button
-                    @click="openChat('{{ $sessionId }}')"
-                    class="w-full text-left px-3 py-2 mb-2 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 transition">
-                    {{ $sessionId }}
-                </button>
-                @endforeach
-            </div>
-
-            <div class="main">
-                <div class="col-12 col-md-10 bg-secondary text-white p-3">
-
-                    <!-- Header -->
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <h2 class="text-lg font-semibold">Lisa</h2>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Ada yang bisa kubantu? 😉</p>
+                <div class="flex-1 overflow-y-auto space-y-2">
+                    <template x-for="chat in chatList" :key="chat.session_id">
+                        <div
+                            class="cursor-pointer py-2 px-3 rounded-md transition-colors duration-200"
+                            @click="loadChat('01@malik', chat.session_id)"
+                            :class="{ 'bg-gray-700 text-gray-100': chat.session_id === activeChatId, 'hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300': chat.id !== activeChatId }"
+                        >
+                            <div x-show="!isCompact" class="font-medium text-sm" x-text="chat.session_id"></div>
+                            <div x-show="!isCompact" class="text-xs truncate opacity-75" x-text="chat.session_id"></div>
+                            <div x-show="isCompact" class="text-center" x-text="chat.session_id"></div>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <button class="px-3 py-2 text-sm rounded-xl border hover:bg-gray-50 dark:hover:bg-gray-800"
-                                @click="toggleCompact()"
-                                x-text="compact ? 'Mode Normal' : 'Mode Compact'"></button>
-                            <button class="px-3 py-2 text-sm rounded-xl border hover:bg-gray-50 dark:hover:bg-gray-800"
-                                @click="clearChat()" title="Hapus semua pesan">Clear</button>
-                        </div>
-                    </div>
-
-                    <!-- Chat Box (scrollable) -->
-                    <div id="chat-box"
-                        class="h-[65vh] overflow-y-auto bg-white dark:bg-gray-900 rounded-2xl p-4 shadow border"
-                        :class="compact ? 'p-3' : 'p-4'" wire:ignore style="scrollbar-gutter: stable;max-height: 50%;" style="margin-bottom: 10px;">
-                        <template x-if="messages.length === 0">
-                            <div class="text-center text-gray-500 dark:text-gray-400 mt-10">
-                                Belum ada pesan, Yuk mulai tanya ke Lisa
-                            </div>
-                        </template>
-
-                        <template x-for="m in messages" :key="m.id">
-                            <div class="mb-3 flex" :class="m.sender === 'user' ? 'justify-end' : 'justify-start'">
-                                <div class="flex items-start gap-2 max-w-[80%]">
-                                    <template x-if="m.sender === 'Lisa'">
-                                        <div class="shrink-0 w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 grid place-items-center">🤖</div>
-                                    </template>
-                                    <div class="p-3 rounded-2xl"
-                                        :class="m.sender === 'user'
-                                             ? 'bg-gray-200 text-gray-900 dark:bg-gray-800 dark:text-gray-100'
-                                             : 'bg-gray-200 text-gray-900 dark:bg-gray-800 dark:text-gray-100'" style="margin-bottom:10px">
-                                        <div class="text-xs opacity-70 mb-1" x-text="m.sender === 'user' ? 'You' : 'Lisa'"></div>
-                                        <div class="whitespace-pre-wrap leading-relaxed" x-html="m.text"></div>
-                                        <div class="flex items-center gap-2 mt-2 text-[11px] opacity-70">
-                                            <span x-text="formatTime(m.at)"></span>
-                                            <button class="underline" @click="copy(m.text)" title="Copy">Copy</button>
-                                        </div>
-                                    </div>
-                                    <template x-if="m.sender === 'user'">
-                                        <div class="shrink-0 w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/40 grid place-items-center">🧑‍💻</div>
-                                    </template>
-                                </div>
-                            </div>
-                        </template>
-
-                        <!-- Typing -->
-                        <template x-if="loading">
-                            <div class="mb-2 flex justify-start">
-                                <div class="flex items-center gap-2 max-w-[80%]">
-                                    <div class="shrink-0 w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 grid place-items-center">🤖</div>
-                                    <div class="px-3 py-2 rounded-2xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200">
-                                        <span class="animate-pulse">Lisa is typing…</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </template>
-                    </div>
-
-                    <!-- Input -->
-                    <div class="flex items-end gap-2" style="margin-top: 10px;">
-                        <textarea
-                            x-model="message"
-                            @keydown.enter.prevent="handleEnter($event)"
-                            {{-- @input="autoResize($event)" --}}
-                            rows="1"
-                            placeholder="Tulis pesan & Enter buat kirim…"
-                            class="flex-1 rounded-xl border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white resize-none p-3"></textarea>
-                        <button class="px-4 py-2 rounded-xl border bg-blue-600 dark:text-white hover:bg-blue-700 disabled:opacity-50"
-                            :disabled="loading || message.trim()===''" @click="sendMessage()">Kirim</button>
-                    </div>
+                    </template>
                 </div>
             </div>
         </div>
-    </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <script>
-        var respon_chat = {
-            "ac82nc023kl": [{
-                    "actor": "system",
-                    "message": "Act as HR Assistant",
-                    "at": "2025-09-05T22:10:00.000Z"
+        <div class="flex-1 flex flex-col rounded-lg bg-white shadow dark:bg-gray-800">
+            <div class="flex-1 overflow-y-auto p-4 space-y-4" x-ref="messagesContainer">
+                <template x-if="messages.length === 0">
+                    <div class="text-center text-gray-400 italic mt-8">Start a new conversation with LISA.</div>
+                </template>
+                <template x-for="message in messages" :key="message.id">
+                    <div class="flex" :class="message.sender === 'user' ? 'justify-end' : 'justify-start'">
+                        <div class="max-w-xl px-4 py-2 rounded-lg"
+                            :class="message.sender === 'user' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-gray-200'">
+                            <p x-text="message.text"></p>
+                            <div class="text-xs mt-1 opacity-75" x-text="message.time"></div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
+            <form @submit.prevent="sendMessage()" class="p-4 border-t border-gray-200 dark:border-gray-700">
+                <div class="flex items-center space-x-2">
+                    <input
+                        type="text"
+                        x-model="input"
+                        placeholder="Tulis pesan & Enter buat kirim..."
+                        class="flex-1 bg-gray-100 text-gray-900 border-none rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-gray-700 dark:text-gray-100"
+                        x-ref="input"
+                    />
+                    <button type="submit"
+                            class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200">
+                        Kirim
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</x-filament-panels::page>
+
+<script>
+
+    const ChatAPI = {
+        baseUrl: "http://localhost:5000",
+        async GetSessionMessages(user_id, session_id) {
+            return await fetch(this.baseUrl + "/api/session/messages" + `?user=${user_id}&session_id=${session_id}`)
+        },
+        GetSession(user_id) {
+            return fetch(this.baseUrl + "/api/sessions" + "?user=" + user_id, {
+                headers: {
+                    'Accept': 'application/json' // Optional: if you expect a JSON response
+                },
+            })
+        },
+        async CreateSession(user_id, prompt) {
+            return await fetch(this.baseUrl + "/api/sessions", {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json' // Optional: if you expect a JSON response
+                },
+                body: JSON.stringify({ "user": user_id, "system_prompt": prompt })
+            })
+        },
+        async PostChat(user_id, session_id, message) {
+            return await fetch(this.baseUrl + "/api/chat", {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ "user": user_id, "message": message, "session_id": session_id})
+            })
+        },
+    }
+</script>
+<script>
+    document.addEventListener('alpine:init', () => {
+
+    Alpine.data('chatApp', () => ({
+        isCompact: false,
+        input: '',
+        messages: [], // Ini akan diisi dari API
+        chatList: [], // Ini juga dari API
+        activeChatId: null,
+
+        // Inisialisasi data & event listeners
+        init() {
+            this.fetchChatList();
+            this.$nextTick(() => {
+                this.$refs.input.focus();
+            });
+
+            // Event listener untuk auto-scroll setelah pesan terkirim
+            // Lo bisa panggil fungsi ini manual setelah sukses fetch pesan
+            // window.addEventListener('message-sent', () => {
+            //     this.autoScroll();
+            // });
+        },
+
+        // Fetch daftar chat dari API
+        async fetchChatList() {
+            this.chatList = [
+                {
+                    id: 123,
+                    title: "Hello",
+                    snippet: "Hello Test",
                 },
                 {
-                    "actor": "user",
-                    "message": "Tolong carikan kandidat untuk perusahaan A.",
-                    "at": "2025-09-05T22:10:10.000Z"
-                },
-                {
-                    "actor": "Lisa",
-                    "message": "Baik, saya akan mencari kandidat sesuai kebutuhan perusahaan A. Apakah ada kriteria khusus?",
-                    "at": "2025-09-05T22:10:20.000Z"
-                },
-                {
-                    "actor": "user",
-                    "message": "Ya, harus punya pengalaman minimal 2 tahun.",
-                    "at": "2025-09-05T22:10:30.000Z"
-                },
-                {
-                    "actor": "Lisa",
-                    "message": "Baik, saya catat. Kandidat untuk perusahaan A harus berpengalaman minimal 2 tahun.",
-                    "at": "2025-09-05T22:10:40.000Z"
-                }
-            ],
-            "cvi10msd": [{
-                    "actor": "system",
-                    "message": "Act as HR Assistant",
-                    "at": "2025-09-05T22:15:00.000Z"
-                },
-                {
-                    "actor": "user",
-                    "message": "Sekarang carikan kandidat untuk perusahaan B dan C.",
-                    "at": "2025-09-05T22:15:10.000Z"
-                },
-                {
-                    "actor": "Lisa",
-                    "message": "Untuk perusahaan B, apakah ada preferensi khusus?",
-                    "at": "2025-09-05T22:15:20.000Z"
-                },
-                {
-                    "actor": "user",
-                    "message": "B perusahaan butuh kandidat fresh graduate.",
-                    "at": "2025-09-05T22:15:30.000Z"
-                },
-                {
-                    "actor": "Lisa",
-                    "message": "Dicatat. Untuk perusahaan C, bagaimana kriterianya?",
-                    "at": "2025-09-05T22:15:40.000Z"
-                },
-                {
-                    "actor": "user",
-                    "message": "C harus punya kemampuan manajerial.",
-                    "at": "2025-09-05T22:15:50.000Z"
-                },
-                {
-                    "actor": "Lisa",
-                    "message": "Oke, saya sudah catat kriteria kandidat untuk perusahaan B dan C.",
-                    "at": "2025-09-05T22:16:00.000Z"
+                    id: 142,
+                    title: "Loker Cleaning Service",
+                    snippet: "Hello Test",
                 }
             ]
-        }
+            // console.log(ChatAPI.GetSession("01@malik"))
+            try {
+                const response = await ChatAPI.GetSession("01@malik").then(response => response.json())
+                this.chatList = response.sessions
+                console.log(this.chatList, response)
+                if (this.chatList.length > 0) {
+                    this.loadChat(this.chatList[0].id); // Load chat pertama secara default
+                }
+            } catch (error) {
+                console.error('Error fetching chat list:', error);
 
-        function chatApp({
-            endpoint = null,
-            persist = true,
-            user_id = null,
-        } = {}) {
-            return {
-                endpoint,
-                persist,
-                user_id,
-                messages: [],
-                message: '',
-                loading: false,
-                compact: false,
-
-                init() {
-                    const saved = this.persist ? JSON.parse(localStorage.getItem('chatbot_messages') ?? '[]') : []
-                    this.messages = saved.length ? saved : [{
-                        id: Date.now(),
-                        sender: 'Lisa',
-                        text: 'Halo! 👋 Ada yang bisa ku bantu?',
-                        at: new Date().toISOString()
-                    }]
-                    this.$nextTick(() => this.scrollToBottom())
-                },
-                save() {
-                    if (this.persist) localStorage.setItem('chatbot_messages', JSON.stringify(this.messages))
-                },
-                clearChat() {
-                    this.messages = [];
-                    this.save()
-                },
-                toggleCompact() {
-                    this.compact = !this.compact
-                },
-                formatTime(iso) {
-                    try {
-                        return new Date(iso).toLocaleTimeString([], {
-                            hour: '2-digit',
-                            minute: '2-digit'
-                        })
-                    } catch {
-                        return ''
-                    }
-                },
-                copy(t) {
-                    navigator.clipboard?.writeText(t)
-                },
-                //autoResize(e) { e.target.style.height='auto'; e.target.style.height=(e.target.scrollHeight)+'px' },
-                push(sender, text, at = new Date().toISOString()) {
-                    this.messages.push({
-                        id: Date.now() + Math.random(),
-                        sender,
-                        text,
-                        at: at
-                    });
-                    this.save();
-                    this.$nextTick(() => this.scrollToBottom())
-                },
-                scrollToBottom() {
-                    const b = document.getElementById('chat-box');
-                    if (b) b.scrollTop = b.scrollHeight
-                },
-
-                // === Enter / Shift+Enter logic ===
-                handleEnter(e) {
-                    if (e.shiftKey) {
-                        return true; // biarin bikin baris baru
-                    }
-                    this.sendMessage(); // Enter biasa = kirim pesan
-                },
-
-                openChat(data = null) {
-                    this.clearChat();
-                    if (data !== null) {
-                        respon_chat[data].forEach(m => {
-                            if (m.actor === 'system') return;
-                            this.push(m.actor, m.message, m.at);
-                        });
-                    } else {
-                        this.push("Lisa", 'Halo! 👋 Ada yang bisa ku bantu?')
-                    }
-                },
-
-                async sendMessage() {
-                    const text = this.message.trim()
-                    if (!text) return
-                    this.push('user', text)
-                    this.message = ''
-                    this.loading = true
-
-                    if (!this.endpoint) {
-                        await new Promise(r => setTimeout(r, 500))
-                        this.push('Lisa', `kamu nanya: “${text}”. (Di sini nanti muncul jawaban dari backend kamu)`)
-                        this.loading = false
-                        return
-                    }
-
-                    try {
-                        const res = await fetch(this.endpoint, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '',
-                                'Accept': 'application/json',
-                            },
-                            body: JSON.stringify({
-                                message: text,
-                                session_id: this.user_id,
-                                user_id: this.user_id,
-                            }),
-                        })
-                        if (!res.ok) throw new Error('Request failed')
-                        const data = await res.json()
-                        this.push('Lisa', data.answer ? marked.parse(data.answer) : '(no reply)')
-                    } catch (e) {
-                        this.push('Lisa', '⚠️ Gagal ambil jawaban dari server.')
-                        console.error(e)
-                    } finally {
-                        this.loading = false
-                    }
-                },
             }
+        },
+
+        // Fungsi untuk memulai chat baru
+        async newChat() {
+            try {
+                const response = await fetch('/api/chats', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title: 'New Chat' }) // Sesuaikan payload
+                });
+                const newChat = await response.json();
+                this.chatList.unshift(newChat);
+                this.loadChat(newChat.id);
+            } catch (error) {
+                console.error('Error creating new chat:', error);
+            }
+        },
+
+        // Fungsi untuk memuat chat lama
+        async loadChat(user_id, session_id) {
+            this.activeChatId = session_id;
+            try {
+                const response = await ChatAPI.GetSessionMessages(user_id, session_id)
+                    .then(response => response.json()); // Ganti dengan endpoint API lo
+                this.messages = response.messages;
+                this.$nextTick(() => this.autoScroll());
+            } catch (error) {
+                console.error('Error loading chat:', error);
+            }
+        },
+
+        // Fungsi untuk mengirim pesan
+        async sendMessage() {
+            if (this.input.trim() === '') return;
+
+            const tempMessage = { sender: 'user', text: this.input, time: new Date().toLocaleTimeString('id-ID'), id: 'temp_' + Date.now() };
+            this.messages.push(tempMessage);
+            this.$nextTick(() => this.autoScroll());
+
+            const messageToSend = this.input;
+            this.input = '';
+
+            try {
+                const response = await fetch(`/api/chats/${this.activeChatId}/messages`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') // Penting untuk Laravel
+                    },
+                    body: JSON.stringify({ text: messageToSend })
+                });
+
+                if (response.ok) {
+                    const newMessage = await response.json();
+                    this.messages = this.messages.filter(msg => msg.id !== tempMessage.id); // Hapus pesan sementara
+                    this.messages.push(newMessage);
+                    this.$nextTick(() => this.autoScroll());
+                } else {
+                    console.error('Failed to send message.');
+                    this.messages = this.messages.filter(msg => msg.id !== tempMessage.id);
+                    // Tampilkan pesan error ke user
+                }
+            } catch (error) {
+                console.error('Error sending message:', error);
+                this.messages = this.messages.filter(msg => msg.id !== tempMessage.id);
+                // Tampilkan pesan error ke user
+            }
+        },
+
+        // Fungsi untuk auto-scroll
+        autoScroll() {
+            this.$refs.messagesContainer.scrollTop = this.$refs.messagesContainer.scrollHeight;
         }
-    </script>
-</x-filament-panels::page>
+    }));
+
+
+});
+</script>

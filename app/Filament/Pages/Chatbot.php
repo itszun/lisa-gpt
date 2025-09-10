@@ -3,90 +3,128 @@
 namespace App\Filament\Pages;
 
 use Filament\Pages\Page;
-use Illuminate\Support\Facades\Auth;
-use BezhanSalleh\FilamentShield\Traits\HasPageShield;
+use Livewire\Attributes\On;
 
 class Chatbot extends Page
 {
-    // use HasPageShield;
-
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
-
+    protected static ?string $navigationIcon = 'heroicon-o-chat-bubble-bottom-center-text';
     protected static string $view = 'filament.pages.chatbot';
-    public array $chat_dummy_data = [];
-    public array $list_dummy_data = [];
+
+    public ?string $activeChatId = 'ac82nc023kl'; // Inisialisasi chat ID yang aktif
+    public string $input = '';
+    public array $messages = [];
+    public array $chatList = [];
+
+    // Data simulasi untuk chat history. Nantinya lo bisa ambil dari database.
+    private array $simulatedChatHistory = [
+        'ac82nc023kl' => [
+            'title' => 'Initial Chat with LISA',
+            'snippet' => 'Halo! 👋 Ada yang bisa ku bantu?',
+            'messages' => [
+                ['sender' => 'assistant', 'text' => 'Halo! 👋 Ada yang bisa ku bantu?', 'time' => '08:06 PM'],
+            ],
+        ],
+        'cvi10msd' => [
+            'title' => 'Follow-up with Talent',
+            'snippet' => 'Selamat datang kembali.',
+            'messages' => [
+                ['sender' => 'assistant', 'text' => 'Selamat datang kembali.', 'time' => '08:00 PM'],
+            ],
+        ],
+    ];
 
     public function mount(): void
     {
-        $this->list_dummy_data = [
-                "id" => Auth::user()->id,
-                "sessions" => [
-                    "ac82nc023kl",
-                    "cvi10msd",
-                ],
-            ];
+        // Isi daftar chat di sidebar
+        $this->chatList = collect($this->simulatedChatHistory)
+            ->map(fn ($data, $id) => [
+                'id' => $id,
+                'title' => $data['title'],
+                'snippet' => $data['snippet'],
+            ])->all();
+
+        // Load chat awal
+        $this->loadChat($this->activeChatId);
     }
 
-    public function fetchChatDataDummy(string $sessionId): void
+    // Method untuk mengirim pesan
+    public function sendMessage(): void
     {
-          $data = [
-                "ac82nc023kl" => [
-                    [
-                        "actor" => "system",
-                        "message" => "Act as HR Assistant",
-                    ],
-                    [
-                        "actor" => "user",
-                        "message" => "Tolong carikan kandidat untuk perusahaan A.",
-                    ],
-                    [
-                        "actor" => "Lisa",
-                        "message" => "Baik, saya akan mencari kandidat sesuai kebutuhan perusahaan A. Apakah ada kriteria khusus?",
-                    ],
-                    [
-                        "actor" => "user",
-                        "message" => "Ya, harus punya pengalaman minimal 2 tahun.",
-                    ],
-                    [
-                        "actor" => "Lisa",
-                        "message" => "Baik, saya catat. Kandidat untuk perusahaan A harus berpengalaman minimal 2 tahun.",
-                    ],
-                ],
-                "cvi10msd" => [
-                    [
-                        "actor" => "system",
-                        "message" => "Act as HR Assistant",
-                    ],
-                    [
-                        "actor" => "user",
-                        "message" => "Sekarang carikan kandidat untuk perusahaan B dan C.",
-                    ],
-                    [
-                        "actor" => "Lisa",
-                        "message" => "Untuk perusahaan B, apakah ada preferensi khusus?",
-                    ],
-                    [
-                        "actor" => "user",
-                        "message" => "B perusahaan butuh kandidat fresh graduate.",
-                    ],
-                    [
-                        "actor" => "Lisa",
-                        "message" => "Dicatat. Untuk perusahaan C, bagaimana kriterianya?",
-                    ],
-                    [
-                        "actor" => "user",
-                        "message" => "C harus punya kemampuan manajerial.",
-                    ],
-                    [
-                        "actor" => "Lisa",
-                        "message" => "Oke, saya sudah catat kriteria kandidat untuk perusahaan B dan C.",
-                    ],
-                ],
-            ];
+        $text = trim($this->input);
+        if ($text === '') {
+            return;
+        }
 
-            $this->chat_dummy_data = $data[$sessionId];
+        // Tambahkan pesan user ke array
+        $this->messages[] = [
+            'sender' => 'user',
+            'text' => $text,
+            'time' => date('h:i A'),
+        ];
+
+        $this->input = '';
+
+        // Dispatch event untuk auto-scroll setelah pesan terkirim
+        $this->dispatch('message-sent');
+
+        // Ini bagian lo nanti bisa integrasi ke API LISA
+        // Contoh:
+        // $response = Http::post('https://api.lisa.com/chat', ['message' => $text]);
+        // $this->messages[] = ['sender' => 'assistant', 'text' => $response['text'], 'time' => date('h:i A')];
+
+        // Simulasi balasan asisten
+        $this->messages[] = [
+            'sender' => 'assistant',
+            'text' => 'Terima kasih, sedang saya proses...',
+            'time' => date('h:i A'),
+        ];
     }
 
+    // Method untuk mengganti chat session
+    #[On('load-chat')]
+    public function loadChat($chatId): void
+    {
+        $this->activeChatId = $chatId;
+        $this->messages = $this->simulatedChatHistory[$chatId]['messages'] ?? [];
+    }
 
-    
+    // Method untuk membuat chat baru
+    public function newChat(): void
+    {
+        $newId = uniqid();
+        $this->activeChatId = $newId;
+        $this->messages = [];
+        $this->chatList[] = [
+            'id' => $newId,
+            'title' => 'New Chat',
+            'snippet' => 'Start a new conversation.',
+        ];
+    }
+     public function checkNewMessages(): void
+    {
+        // --- SIMULASI LOGIC BARU ---
+        //
+        // Ini adalah contoh sederhana untuk menguji fitur polling.
+        // Di aplikasi sebenarnya, ini adalah tempat lo
+        // melakukan panggilan ke database atau API untuk cek
+        // apakah ada pesan baru untuk 'activeChatId' saat ini.
+        //
+        // Contoh:
+        // $latestMessages = ChatMessage::where('chat_id', $this->activeChatId)
+        //                               ->where('created_at', '>', $this->latestTimestamp)
+        //                               ->get();
+        // $this->messages = array_merge($this->messages, $latestMessages->toArray());
+
+        // Contoh simulasi: tambahkan pesan asisten setiap 5 detik.
+        if (count($this->messages) % 2 !== 0 && now()->format('s') % 5 === 0) {
+            $this->messages[] = [
+                'sender' => 'assistant',
+                'text' => 'LISA di sini. Apakah ada lagi yang bisa saya bantu, Jun?',
+                'time' => date('h:i A'),
+            ];
+
+            // Dispatch event untuk auto-scroll
+            $this->dispatch('message-sent');
+        }
+    }
 }
