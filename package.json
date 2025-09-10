@@ -19,6 +19,7 @@
         "vite": "^7.0.4"
     },
     "dependencies": {
-        "@tailwindcss/typography": "^0.5.16"
+        "@tailwindcss/typography": "^0.5.16",
+        "postcss-nesting": "^13.0.2"
     }
 }
