@@ -24,9 +24,9 @@ class UpdateJobOpeningRequest extends FormRequest
         return [
 			'company_id' => 'required',
 			'title' => 'required',
-			'body' => 'required|string',
-			'due_date' => 'required|date',
-			'status' => 'required'
+			'body' => 'nullable|string',
+			'due_date' => 'nullable|date',
+			'status' => 'nullable|integer',
 		];
     }
 }
