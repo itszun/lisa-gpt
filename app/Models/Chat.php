@@ -14,10 +14,30 @@ class Chat extends Model
         'context',
         'message',
         'response',
+        'created_by',
     ];
 
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function createdByUser()
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function casts(): array
+    {
+        return [
+            'session_id' => 'string',
+            'parent_id_session' => 'string',
+            'user_id' => 'integer',
+            'title' => 'string',
+            'context' => 'string',
+            'message' => 'string',
+            'response' => 'json',
+            'created_by' => 'integer',
+        ];
     }
 }
