@@ -33,7 +33,7 @@
                             @click="loadChat(user_id, chat.session_id)"
                             :class="{
                                  'bg-gray-700 text-gray-100': chat.session_id === activeChatId,
-                                 'hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300': chat.id !== activeChatId }">
+                                 'hover:bg-gray-500 dark:hover:bg-gray-700 dark:text-gray-300': chat.id !== activeChatId }">
                             <div x-show="!isCompact" class="font-medium text-sm" x-text="chat.title"></div>
                             {{-- <div x-show="!isCompact" class="text-xs truncate opacity-75" x-text="chat.session_id"></div> --}}
                             <div x-show="isCompact" class="text-center" x-text="chat.title.charAt(0)"></div>
@@ -59,7 +59,7 @@
                             'bg-primary-500 text-gray-900 dark:bg-primary-500 dark:text-gray-200' :
                                 'bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-gray-200'">
                             <p x-html="MarkedParse(message.content)"></p>
-                            <div class="text-xs mt-1 opacity-75" x-text="'--:--'">--:--</div>
+                            <div class="text-xs mt-1 opacity-75" x-text="Timestamp(message.timestamp)"></div>
                         </div>
 
                     </div>
@@ -82,6 +82,7 @@
     <input type="hidden" id="CHAT_BASE_URL" name="CHAT_BASE_URL" value="{{$chat_base_url}}">
 </x-filament-panels::page>
 <script src="https://cdn.jsdelivr.net/npm/marked/lib/marked.umd.js"></script>
+<script src="https://unpkg.com/typewriter-effect@latest/dist/core.js"></script>
 <script>
     const ChatAPI = {
         baseUrl: document.getElementById('CHAT_BASE_URL').value,
@@ -138,6 +139,10 @@
             messages: [], // Ini akan diisi dari API
             chatList: [], // Ini juga dari API
             activeChatId: null,
+            fetching: {
+                status: false,
+                message: "Lisa thinking..."
+            },
 
             // Inisialisasi data & event listeners
             init() {
@@ -154,6 +159,20 @@
             },
             MarkedParse(string) {
                 return marked.parse(string)
+            },
+            Timestamp(timestampString) {
+
+                const dateObject = new Date(timestampString);
+
+                // Output the Date object
+                console.log(dateObject); // Output: 2025-09-10T18:35:52.413Z (di UTC)
+                return dateObject.toString()
+            },
+            TypingEffect(string) {
+                new Typewriter('#typewriter', {
+                strings: ['Hello', 'World'],
+                autoStart: true,
+                });
             },
 
             // Fetch daftar chat dari API
@@ -208,7 +227,7 @@
                 const tempMessage = {
                     role: 'user',
                     content: this.input,
-                    time: new Date().toLocaleTimeString('id-ID'),
+                    timestamp: new Date().toLocaleTimeString('id-ID'),
                     id: 'temp_' + Date.now()
                 };
                 this.messages.push(tempMessage);
@@ -230,7 +249,7 @@
                         this.messages.push({
                             role: "assistant",
                             content: newMessage,
-                            time: '--:--',
+                            timestamp: '--:--',
                             id: 'temp_' + Date.now()
                         });
                         this.$nextTick(() => this.autoScroll());
