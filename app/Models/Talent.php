@@ -43,4 +43,13 @@ class Talent extends Model
         ->join('job_openings', 'candidates.job_opening_id', '=', 'job_openings.id')
         ->select('companies.*');
     }
+
+    public function scopeTalent($query)
+    {
+        if(is_null(auth()->user()->talent_id)){
+            return $query;
+        } else {
+            return $query->where('id', auth()->user()->talent_id);
+        }
+    }
 }

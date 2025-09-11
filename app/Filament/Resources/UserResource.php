@@ -12,6 +12,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use function Laravel\Prompts\search;
 
 class UserResource extends Resource
 {
@@ -34,6 +35,14 @@ class UserResource extends Resource
                     ->hiddenOn('edit'),
                 Forms\Components\Select::make('roles')
                     ->relationship('roles', 'name'),
+                Forms\Components\Select::make('company_id')
+                    ->relationship('company', 'name')
+                    ->preload()
+                    ->searchable(),
+                Forms\Components\Select::make('talent_id')
+                    ->relationship('talent', 'name')
+                    ->preload()
+                    ->searchable(),
             ]);
     }
 
@@ -48,6 +57,12 @@ class UserResource extends Resource
                     ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('roles.name')
+                    ->sortable()
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('company.name')
+                    ->sortable()
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('talent.name')
                     ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')

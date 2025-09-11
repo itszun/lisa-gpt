@@ -28,6 +28,8 @@ class User extends Authenticatable implements FilamentUser
         'name',
         'email',
         'password',
+        'company_id',
+        'talent_id'
     ];
 
     /**
@@ -81,5 +83,15 @@ class User extends Authenticatable implements FilamentUser
     public function getChatUserIdAttribute()
     {
         return $this->id."@".Str::snake($this->name);
+    }
+
+    public function company()
+    {
+        return $this->belongsTo(Company::class);
+    }
+
+    public function talent()
+    {
+        return $this->belongsTo(Talent::class);
     }
 }

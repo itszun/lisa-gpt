@@ -64,6 +64,7 @@ class CompanyResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn ($query) => $query->company())
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->sortable()

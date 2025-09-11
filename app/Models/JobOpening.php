@@ -30,4 +30,13 @@ class JobOpening extends Model
     {
         return $this->hasMany(Candidate::class);
     }
+
+    public function scopeCompany($query)
+    {
+        if(is_null(auth()->user()->company_id)){
+            return $query;
+        } else {
+            return $query->where('company_id', auth()->user()->company_id);
+        }
+    }
 }

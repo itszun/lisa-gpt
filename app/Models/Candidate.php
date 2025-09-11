@@ -35,4 +35,19 @@ class Candidate extends Model
     {
         return $this->belongsTo(JobOpening::class);
     }
+
+    public function scopeCompany($query)
+    {
+        if(is_null(auth()->user()->company_id) && is_null(auth()->user()->talent_id)){
+            return $query;
+        } elseif(is_null(auth()->user()->company_id)) {
+            return $query->whereHas('talent', function ($q) {
+                $q->where('id', auth()->user()->talent_id);
+            });
+        } else {
+            return $query->whereHas('jobOpening', function ($q) {
+                $q->where('company_id', auth()->user()->company_id ? auth()->user()->company_id : null);
+            });
+        }
+    }
 }

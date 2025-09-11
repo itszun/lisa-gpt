@@ -49,6 +49,7 @@ class JobOpeningResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn ($query) => $query->company())
             ->columns([
                 Tables\Columns\TextColumn::make('company.name')
                     ->label('Company')
