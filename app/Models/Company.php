@@ -21,6 +21,13 @@ class Company extends Model
         'status' => 'integer',
     ];
 
+    public static function boot() {
+        parent::boot();
+        static::saved(function($model) {
+            $model->feed();
+        });
+    }
+
     public function jobOpenings()
     {
         return $this->hasMany(JobOpening::class);
@@ -50,6 +57,24 @@ class Company extends Model
         } else {
             return $query->where('id', auth()->user()->company_id);
         }
+    }
+
+    public function feed()
+    {
+        $item = $this;
+        $properties = $item->properties
+        ->reduce(fn($acc, $i) => $acc.($i['key'] . ": ". $i['value'])."\n", "");
+        $item->description = $item->description."\nDetail: \n".$properties;
+        $item = $item->toArray();
+        unset($item['properties']);
+        $item = Arr::dot($item);
+
+        Http::withHeaders([
+            'Content-Type' => "application/json",
+            'Accept' => "application/json",
+        ])->post(config('chatbot.host') . "/api/feeder/companies", [
+            'data' => [$item]
+        ]);
     }
 
     public static function feedAll()
