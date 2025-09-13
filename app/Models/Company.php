@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Http;
 
 class Company extends Model
 {
@@ -37,17 +39,39 @@ class Company extends Model
             'company_id',
             'job_opening_id',
             'id',
-            'id' 
+            'id'
         );
     }
 
     public function scopeCompany($query)
     {
-        if(is_null(auth()->user()->company_id)){
+        if (is_null(auth()->user()->company_id)) {
             return $query;
         } else {
             return $query->where('id', auth()->user()->company_id);
         }
     }
 
+    public static function feedAll()
+    {
+        static::query()
+            ->with('properties', function ($q) {
+                $q->select('id', 'company_id', 'key', 'value');
+            })->chunk(10, function ($records) {
+                $records = $records->map(function ($item) {
+                    $properties = $item->properties
+                    ->reduce(fn($acc, $i) => $acc.($i['key'] . ": ". $i['value'])."\n", "");
+                    $item->description = $item->description."\nDetail: \n".$properties;
+                    $item = $item->toArray();
+                    unset($item['properties']);
+                    return Arr::dot($item);
+                });
+                Http::withHeaders([
+                    'Content-Type' => "application/json",
+                    'Accept' => "application/json",
+                ])->post(config('chatbot.host') . "/api/feeder/companies", [
+                    'data' => $records
+                ]);
+            });
+    }
 }

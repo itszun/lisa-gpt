@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Http;
 
 class Candidate extends Model
 {
@@ -49,5 +51,27 @@ class Candidate extends Model
                 $q->where('company_id', auth()->user()->company_id ? auth()->user()->company_id : null);
             });
         }
+    }
+
+
+    public static function feedAll()
+    {
+        static::query()
+        ->with('talent', function($q) {
+            $q->select('id', 'name','position');
+        })
+        ->with('jobOpening', function($q) {
+            $q->select('id', 'title');
+        })->chunk(10, function($records) {
+            $records = $records->map(function($item) {
+                return Arr::dot($item->toArray());
+            });
+            Http::withHeaders([
+                'Content-Type' => "application/json",
+                'Accept' => "application/json",
+            ])->post(config('chatbot.host')."/api/feeder/candidates", [
+                'data' => $records
+            ]);
+        });
     }
 }

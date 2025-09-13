@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Http;
 
 class Talent extends Model
 {
@@ -51,5 +53,30 @@ class Talent extends Model
         } else {
             return $query->where('id', auth()->user()->talent_id);
         }
+    }
+
+
+    public static function feedAll()
+    {
+        static::query()
+            ->with('candidates', fn($q) => $q->select('id', 'job_opening_id', 'talent_id'))
+            ->chunk(10, function($records) {
+            $records = $records->map(function($item) {
+                $item->skills = implode(", ", $item->skills);
+                $item->educations = implode(", ", $item->educations);
+                return Arr::dot($item->toArray());
+            })->map(function($item) {
+                if(isset($item['candidates']) && count($item['candidates']) < 1) {
+                    $item['candidates'] = "";
+                }
+                return $item;
+            });
+            Http::withHeaders([
+                'Content-Type' => "application/json",
+                'Accept' => "application/json",
+            ])->post(config('chatbot.host')."/api/feeder/talents", [
+                'data' => $records
+            ]);
+        });
     }
 }

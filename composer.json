@@ -10,9 +10,11 @@
         "bezhansalleh/filament-shield": "^3.3",
         "filament/filament": "~3",
         "icetalker/filament-table-repeatable-entry": "^1.1",
+        "inertiajs/inertia-laravel": "^2.0",
         "laravel/framework": "^12.0",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.10.1",
+        "mxl/laravel-job": "*",
         "rupadana/filament-api-service": "^3.4"
     },
     "require-dev": {

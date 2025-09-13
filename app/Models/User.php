@@ -12,6 +12,8 @@ use Illuminate\Notifications\Notifiable;
 use Filament\Models\Contracts\FilamentUser;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
 class User extends Authenticatable implements FilamentUser
@@ -82,7 +84,7 @@ class User extends Authenticatable implements FilamentUser
 
     public function getChatUserIdAttribute()
     {
-        return $this->id."@".Str::snake($this->name);
+        return $this->id . "@" . Str::snake($this->name);
     }
 
     public function company()
@@ -93,5 +95,24 @@ class User extends Authenticatable implements FilamentUser
     public function talent()
     {
         return $this->belongsTo(Talent::class);
+    }
+
+
+    public static function feedAll()
+    {
+        static::query()
+            ->with('company', fn($q) => $q->select('id', 'name'))
+            ->with('talent', fn($q) => $q->select('id', 'name'))
+            ->chunk(10, function ($records) {
+                $records = $records->map(function ($item) {
+                    return Arr::dot($item->toArray());
+                });
+                Http::withHeaders([
+                    'Content-Type' => "application/json",
+                    'Accept' => "application/json",
+                ])->post(config('chatbot.host')."/api/feeder/users", [
+                    'data' => $records
+                ]);
+            });
     }
 }

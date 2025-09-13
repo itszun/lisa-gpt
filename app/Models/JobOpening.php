@@ -51,7 +51,7 @@ class JobOpening extends Model
             Http::withHeaders([
                 'Content-Type' => "application/json",
                 'Accept' => "application/json",
-            ])->post("http://localhost:5000/api/feeder/job_openings", [
+            ])->post(config('chatbot.host')."/api/feeder/job_openings", [
                 'data' => $records
             ]);
         });
