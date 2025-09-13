@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Http;
 
 class JobOpening extends Model
 {
@@ -38,5 +40,20 @@ class JobOpening extends Model
         } else {
             return $query->where('company_id', auth()->user()->company_id);
         }
+    }
+
+    public static function feedAll()
+    {
+        static::with('company')->chunk(10, function($records) {
+            $records = $records->map(function($item) {
+                return Arr::dot($item->toArray());
+            });
+            Http::withHeaders([
+                'Content-Type' => "application/json",
+                'Accept' => "application/json",
+            ])->post("http://localhost:5000/api/feeder/job_openings", [
+                'data' => $records
+            ]);
+        });
     }
 }
