@@ -82,9 +82,10 @@ class Talent extends Model
 
     public function createUser() {
         $item = $this;
-        $user = User::create([
-            'name' => $item->name,
+        $user = User::updateOrCreate([
             'email' => Str::camel($item->name)."@mail.com",
+        ],[
+            'name' => $item->name,
             'talent_id' => $item->id,
             'password' => Hash::make(1)
         ]);

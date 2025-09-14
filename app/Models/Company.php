@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 
 class Company extends Model
@@ -98,5 +100,19 @@ class Company extends Model
                     'data' => $records
                 ]);
             });
+    }
+
+
+    public function createUser() {
+        $item = $this;
+        $user = User::updateOrCreate([
+            'email' => Str::camel($item->name)."@mail.com",
+        ],[
+            'name' => $item->name,
+            'company_id' => $item->id,
+            'password' => Hash::make(1)
+        ]);
+        $user->assignRole('company');
+        return $item;
     }
 }
