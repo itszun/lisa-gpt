@@ -71,11 +71,14 @@ class Talent extends Model
     public function toFodder()
     {
         $item = $this;
-        $item->skills = implode(", ", $item->skills);
-        $item->educations = implode(", ", $item->educations);
+
         if (empty($item->user)) {
             $item->createUser();
+            $item->fresh();
         }
+
+        $item->skills = implode(", ", $item->skills);
+        $item->educations = implode(", ", $item->educations);
         $item->chat_user_id = $item->user->chat_user_id;
         $item->candidate_ids = implode(", ", $item->candidates->reduce(fn($acc, $i) => array_merge($acc, [$i->id]), []));
         $item->source = config('app.key');
