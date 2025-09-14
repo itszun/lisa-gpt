@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Jobs\FeederAll;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use App\Models\Talent;
@@ -24,10 +25,12 @@ class DatabaseSeeder extends Seeder
         //     'name' => 'Test User',
         //     'email' => 'test@example.com',
         // ]);
-        
+
         Talent::factory(100)->create();
         Company::factory(100)->withProperties()->create();
         JobOpening::factory(100)->create();
         Candidate::factory(100)->create();
+
+        FeederAll::dispatchSync();
     }
 }

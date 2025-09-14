@@ -74,19 +74,23 @@ class Talent extends Model
     public static function createAllUser() {
         $talents = Talent::whereDoesntHave('user')->get();
         $count = count($talents);
-        $talents->map(function($item) {
-            $user = User::create([
-                'name' => $item->name,
-                'email' => Str::camel($item->name)."@mail.com",
-                'talent_id' => $item->id,
-                'password' => Hash::make(1)
-            ]);
-            $user->assignRole('talent');
-            return $item;
+        $talents->map(function(Talent $item) {
+            return $item->createUser();
         });
         print("$count total user-talent created ");
     }
 
+    public function createUser() {
+        $item = $this;
+        $user = User::create([
+            'name' => $item->name,
+            'email' => Str::camel($item->name)."@mail.com",
+            'talent_id' => $item->id,
+            'password' => Hash::make(1)
+        ]);
+        $user->assignRole('talent');
+        return $item;
+    }
 
 
     public static function feedAll()
