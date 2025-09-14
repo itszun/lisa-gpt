@@ -57,6 +57,22 @@ class User extends Authenticatable implements FilamentUser
         ];
     }
 
+
+    public static function boot()
+    {
+        static::saved(function($item) {
+            $item->set_chat_user_id();
+        });
+        return parent::boot();
+    }
+
+    public function set_chat_user_id()
+    {
+        $this->chat_user_id = $this->id . "@" . Str::snake($this->name);
+        $this->save();
+        return $this;
+    }
+
     public function canAccessPanel(Panel $panel): bool
     {
         // Super admin hanya boleh masuk panel 'admin'
@@ -82,10 +98,6 @@ class User extends Authenticatable implements FilamentUser
         return $this->hasMany(Chat::class);
     }
 
-    public function getChatUserIdAttribute()
-    {
-        return $this->id . "@" . Str::snake($this->name);
-    }
 
     public function company()
     {

@@ -9,6 +9,7 @@ use App\Models\Talent;
 use App\Models\User;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Support\Facades\Http;
 use Laravel\Prompts\Progress;
 
 use function Laravel\Prompts\progress;
@@ -17,12 +18,14 @@ class FeederAll implements ShouldQueue
 {
     use Queueable;
 
+    public $clean = 0;
+
     /**
      * Create a new job instance.
      */
-    public function __construct()
+    public function __construct($clean = 0)
     {
-        //
+        $this->clean = $clean;
     }
 
     /**
@@ -30,6 +33,8 @@ class FeederAll implements ShouldQueue
      */
     public function handle(): void
     {
+        if($this->clean) Http::post(config('chatbot.host')."/api/feeder/clean");
+
         $progress = new Progress("Feeding User..", 6);
         User::feedAll();
         $progress->progress = 1;

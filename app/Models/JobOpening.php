@@ -33,6 +33,11 @@ class JobOpening extends Model
         return $this->hasMany(Candidate::class);
     }
 
+    public function talents()
+    {
+        return $this->belongsToMany(Talent::class, 'candidates', 'job_opening_id', 'talent_id');
+    }
+
     public function scopeCompany($query)
     {
         if(is_null(auth()->user()->company_id)){
@@ -42,11 +47,22 @@ class JobOpening extends Model
         }
     }
 
+    public function toFodder() {
+        $item = $this;
+        $item->job_opening_id = $item->id;
+        $item->candidate_ids = implode(", ",$item->candidates->reduce(fn($acc, $i) => array_merge($acc, [$i->id]), []));
+        $item->candidate_talent_ids = implode(",",$item->talents->reduce(fn($acc, $i) => array_merge($acc, [$i->id]), []));
+        $item = $item->toArray();
+        unset($item['candidates']);
+        unset($item['talents']);
+        return Arr::dot($item);
+    }
+
     public static function feedAll()
     {
-        static::with('company')->chunk(10, function($records) {
+        static::with('company', 'candidates:id,talent_id,status', 'talents:id,name')->chunk(10, function($records) {
             $records = $records->map(function($item) {
-                return Arr::dot($item->toArray());
+                return $item->toFodder();
             });
             Http::withHeaders([
                 'Content-Type' => "application/json",

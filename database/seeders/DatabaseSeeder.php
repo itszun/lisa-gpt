@@ -11,6 +11,9 @@ use App\Models\Candidate;
 use App\Models\JobOpening;
 use App\Models\CompanyProperty;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
+use Spatie\Permission\Models\Role;
 
 class DatabaseSeeder extends Seeder
 {
@@ -26,11 +29,32 @@ class DatabaseSeeder extends Seeder
         //     'email' => 'test@example.com',
         // ]);
 
-        Talent::factory(100)->create();
-        Company::factory(100)->withProperties()->create();
-        JobOpening::factory(100)->create();
-        Candidate::factory(100)->create();
+        Role::create([
+            'name' => 'admin',
+            'guard_name' => 'web',
+        ]);
+        Role::create([
+            'name' => 'talent',
+            'guard_name' => 'web',
+        ]);
+        Role::create([
+            'name' => 'company',
+            'guard_name' => 'web',
+        ]);
 
-        FeederAll::dispatchSync();
+        $user = User::create([
+            'name' => "Admin",
+            'email' => "admin@altateknologi.com",
+            'password' => Hash::make('1'),
+        ]);
+        // $user->assignRole("super_admin");
+
+        Talent::factory(20)->create();
+        Talent::createAllUser();
+        Company::factory(5)->withProperties()->create();
+        Company::createAllUser();
+        JobOpening::factory(5)->create();
+        // Candidate::factory(100)->create();
+
     }
 }

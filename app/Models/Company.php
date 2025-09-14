@@ -25,9 +25,14 @@ class Company extends Model
 
     public static function boot() {
         parent::boot();
-        static::saved(function($model) {
-            $model->feed();
-        });
+        // static::saved(function($model) {
+        //     $model->feed();
+        // });
+    }
+
+    public function user()
+    {
+        return $this->hasOne(User::class, 'company_id');
     }
 
     public function jobOpenings()
@@ -81,10 +86,11 @@ class Company extends Model
 
     public static function feedAll()
     {
+        $n = 0;
         static::query()
             ->with('properties', function ($q) {
                 $q->select('id', 'company_id', 'key', 'value');
-            })->chunk(10, function ($records) {
+            })->chunk(10, function ($records) use (&$n) {
                 $records = $records->map(function ($item) {
                     $properties = $item->properties
                     ->reduce(fn($acc, $i) => $acc.($i['key'] . ": ". $i['value'])."\n", "");
@@ -100,6 +106,16 @@ class Company extends Model
                     'data' => $records
                 ]);
             });
+    }
+
+
+    public static function createAllUser() {
+        $company = Company::whereDoesntHave('user')->get();
+        $count = count($company);
+        $company->map(function(Talent $item) {
+            return $item->createUser();
+        });
+        print("$count total user-company created ");
     }
 
 
