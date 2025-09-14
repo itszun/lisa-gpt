@@ -29,22 +29,23 @@ class DatabaseSeeder extends Seeder
         //     'email' => 'test@example.com',
         // ]);
 
-        Role::create([
+        Role::updateOrCreate([
             'name' => 'admin',
             'guard_name' => 'web',
         ]);
-        Role::create([
+        Role::updateOrCreate([
             'name' => 'talent',
             'guard_name' => 'web',
         ]);
-        Role::create([
+        Role::updateOrCreate([
             'name' => 'company',
             'guard_name' => 'web',
         ]);
 
-        $user = User::create([
-            'name' => "Admin",
+        $user = User::updateOrCreate([
             'email' => "admin@altateknologi.com",
+        ],[
+            'name' => "Admin",
             'password' => Hash::make('1'),
         ]);
         // $user->assignRole("super_admin");
