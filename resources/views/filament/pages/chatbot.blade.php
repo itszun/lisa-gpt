@@ -249,7 +249,7 @@
                         this.messages.push({
                             role: "assistant",
                             content: newMessage,
-                            timestamp: '--:--',
+                            timestamp: response.timestamp,
                             id: 'temp_' + Date.now()
                         });
                         this.$nextTick(() => this.autoScroll());
