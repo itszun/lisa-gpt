@@ -60,10 +60,10 @@ class User extends Authenticatable implements FilamentUser
 
     public static function boot()
     {
-        static::saved(function($item) {
+        parent::boot();
+        static::created(function($item) {
             $item->set_chat_user_id();
         });
-        return parent::boot();
     }
 
     public function set_chat_user_id()

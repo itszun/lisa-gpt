@@ -71,12 +71,6 @@ class Talent extends Model
     public function toFodder()
     {
         $item = $this;
-
-        if (empty($item->user)) {
-            $item->createUser();
-            $item->fresh();
-        }
-
         $item->skills = implode(", ", $item->skills);
         $item->educations = implode(", ", $item->educations);
         $item->chat_user_id = $item->user->chat_user_id;
@@ -92,15 +86,19 @@ class Talent extends Model
     {
         $talents = Talent::whereDoesntHave('user')->get();
         $count = count($talents);
-        $talents->map(function (Talent $item) {
-            return $item->createUser();
+        dump("COUNT $count");
+        $talents->each(function (Talent $item) {
+            dump("create user for each ".$item->name);
+            $item->createUser();
+            dump("Done Create".$item->name);
+
         });
-        print("$count total user-talent created ");
+        dump("$count total user-talent created ");
     }
 
     public function createUser()
     {
-        $item = $this;
+        $item = &$this;
         $user = User::updateOrCreate([
             'email' => Str::camel($item->name) . "@mail.com",
         ], [
@@ -116,6 +114,7 @@ class Talent extends Model
     public static function feedAll()
     {
         static::query()
+            ->whereHas('user')
             ->with(['user:id,talent_id,name,email,chat_user_id', 'candidates:id,job_opening_id,talent_id'])
             ->chunk(10, function ($records) {
                 $records = $records->map(function (Talent $item) {
