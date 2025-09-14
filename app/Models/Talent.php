@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
 
 class Talent extends Model
@@ -46,6 +48,11 @@ class Talent extends Model
         ->select('companies.*');
     }
 
+    public function user()
+    {
+        return $this->hasOne(User::class, 'talent_id', 'id');
+    }
+
     public function scopeTalent($query)
     {
         if(is_null(auth()->user()->talent_id)){
@@ -55,6 +62,32 @@ class Talent extends Model
         }
     }
 
+    public function toFodder() {
+        $item = $this;
+        $item->skills = implode(", ", $item->skills);
+        $item->educations = implode(", ", $item->educations);
+        $item->chat_user_id = $item->user->chat_user_id;
+        $item->source = config('app.key');
+        return Arr::dot($item->toArray());
+    }
+
+    public static function createAllUser() {
+        $talents = Talent::whereDoesntHave('user')->get();
+        $count = count($talents);
+        $talents->map(function($item) {
+            $user = User::create([
+                'name' => $item->name,
+                'email' => Str::camel($item->name)."@mail.com",
+                'talent_id' => $item->id,
+                'password' => Hash::make(1)
+            ]);
+            $user->assignRole('talent');
+            return $item;
+        });
+        print("$count total user-talent created ");
+    }
+
+
 
     public static function feedAll()
     {
@@ -62,9 +95,7 @@ class Talent extends Model
             ->with('candidates', fn($q) => $q->select('id', 'job_opening_id', 'talent_id'))
             ->chunk(10, function($records) {
             $records = $records->map(function($item) {
-                $item->skills = implode(", ", $item->skills);
-                $item->educations = implode(", ", $item->educations);
-                return Arr::dot($item->toArray());
+                return $item->toFodder();
             })->map(function($item) {
                 if(isset($item['candidates']) && count($item['candidates']) < 1) {
                     $item['candidates'] = "";
