@@ -68,6 +68,7 @@ class User extends Authenticatable implements FilamentUser
 
     public function set_chat_user_id()
     {
+        $this->fresh();
         $this->chat_user_id = $this->id . "@" . Str::snake($this->name);
         $this->save();
         return $this;
