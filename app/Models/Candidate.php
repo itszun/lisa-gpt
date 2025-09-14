@@ -53,6 +53,17 @@ class Candidate extends Model
         }
     }
 
+    public function toFodder()
+    {
+        $item = $this;
+        $item->chat_user_id = $item->talent->user->chat_user_id;
+        $item->document = view('fodder.candidate', ['candidate' => $item])->render();
+        $item = $item->toArray();
+        unset($item['talent']);
+        unset($item['job_opening']);
+        return Arr::dot($item);
+    }
+
 
     public static function feedAll()
     {
@@ -64,7 +75,7 @@ class Candidate extends Model
             $q->select('id', 'title');
         })->chunk(10, function($records) {
             $records = $records->map(function($item) {
-                return Arr::dot($item->toArray());
+                return $item->toFodder();
             });
             Http::withHeaders([
                 'Content-Type' => "application/json",

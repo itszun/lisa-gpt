@@ -84,6 +84,28 @@ class Company extends Model
         ]);
     }
 
+    public function getJobOpeningIdsAttribute()
+    {
+        return implode(",", $this->jobOpenings->reduce(fn($acc, $i) => array_merge($acc, [$i->id]), []));
+    }
+
+    public function toFodder()
+    {
+        $item = $this;
+        $properties = $item
+            ->properties
+            ->reduce(fn($acc, $i) => $acc.($i['key'] . ": ". $i['value'])."\n", "");
+        $item->description = $item->description."\nDetail: \n".$properties;
+        $item->job_opening_ids;
+        $item->document = view('fodder.company', ['company' => $item])->render();
+        $item = $item->toArray();
+        unset($item['properties']);
+        unset($item['job_openings']);
+        unset($item['created_at']);
+        unset($item['updated_at']);
+        return Arr::dot($item);
+    }
+
     public static function feedAll()
     {
         $n = 0;
@@ -92,12 +114,7 @@ class Company extends Model
                 $q->select('id', 'company_id', 'key', 'value');
             })->chunk(10, function ($records) use (&$n) {
                 $records = $records->map(function ($item) {
-                    $properties = $item->properties
-                    ->reduce(fn($acc, $i) => $acc.($i['key'] . ": ". $i['value'])."\n", "");
-                    $item->description = $item->description."\nDetail: \n".$properties;
-                    $item = $item->toArray();
-                    unset($item['properties']);
-                    return Arr::dot($item);
+                    return $item->toFodder();
                 });
                 Http::withHeaders([
                     'Content-Type' => "application/json",

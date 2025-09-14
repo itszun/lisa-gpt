@@ -47,14 +47,26 @@ class JobOpening extends Model
         }
     }
 
+    public function getCandidateIdsAttribute() {
+        return implode(", ", $this->candidates->reduce(fn($acc, $i) => array_merge($acc, [$i->id]), []));
+    }
+
+    public function getCandidateTalentIdsAttribute() {
+        return implode(",", $this->talents->reduce(fn($acc, $i) => array_merge($acc, [$i->id]), []));
+    }
+
     public function toFodder() {
         $item = $this;
         $item->job_opening_id = $item->id;
-        $item->candidate_ids = implode(", ",$item->candidates->reduce(fn($acc, $i) => array_merge($acc, [$i->id]), []));
-        $item->candidate_talent_ids = implode(",",$item->talents->reduce(fn($acc, $i) => array_merge($acc, [$i->id]), []));
+        $item->candidate_ids;
+        $item->candidate_talent_ids;
+        $item->document = view('fodder.job_opening', ['job_opening' => $this])->render();
         $item = $item->toArray();
         unset($item['candidates']);
         unset($item['talents']);
+        unset($item['company']);
+        unset($item['created_at']);
+        unset($item['updated_at']);
         return Arr::dot($item);
     }
 

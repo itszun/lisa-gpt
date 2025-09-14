@@ -56,7 +56,7 @@ class Talent extends Model
     public function jobOpenings()
     {
         // A Talent belongs to many JobOpenings through the 'candidates' pivot table.
-        return $this->belongsToMany(JobOpening::class, 'candidates', 'talent_id', 'job_opening_id');
+        return $this->hasManyThrough(JobOpening::class, 'candidates', 'talent_id', 'job_opening_id');
     }
 
     public function scopeTalent($query)
@@ -68,16 +68,26 @@ class Talent extends Model
         }
     }
 
+    public function getCandidateIdsAttribute()
+    {
+        return implode(", ", $this->candidates->reduce(fn($acc, $i) => array_merge($acc, [$i->id]), []));
+    }
+
     public function toFodder()
     {
         $item = $this;
         $item->skills = implode(", ", $item->skills);
         $item->educations = implode(", ", $item->educations);
         $item->chat_user_id = $item->user->chat_user_id;
-        $item->candidate_ids = implode(", ", $item->candidates->reduce(fn($acc, $i) => array_merge($acc, [$i->id]), []));
+        $item->candidate_ids;
+        $item->job_opening_ids;
         $item->source = config('app.key');
+        $item->document = view('fodder.talent', ['talent' => $item])->render();
         $item = $item->toArray();
         unset($item['candidates']);
+        unset($item['user']);
+        unset($item['created_at']);
+        unset($item['updated_at']);
 
         return Arr::dot($item);
     }

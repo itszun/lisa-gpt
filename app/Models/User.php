@@ -110,6 +110,23 @@ class User extends Authenticatable implements FilamentUser
         return $this->belongsTo(Talent::class);
     }
 
+    public function toFodder()
+    {
+        $document = view('fodder.user', [
+            'user' => $this,
+        ])->render();
+        $item = $this->toArray();
+        unset($item['talent']);
+        unset($item['company']);
+        unset($item['roles']);
+        unset($item['created_at']);
+        unset($item['updated_at']);
+        unset($item['email_verified_at']);
+        $item = Arr::dot($item);
+        $item['document'] = $document;
+        return $item;
+    }
+
 
     public static function feedAll()
     {
@@ -118,7 +135,7 @@ class User extends Authenticatable implements FilamentUser
             ->with('talent', fn($q) => $q->select('id', 'name'))
             ->chunk(10, function ($records) {
                 $records = $records->map(function ($item) {
-                    return Arr::dot($item->toArray());
+                    return $item->toFodder();
                 });
                 Http::withHeaders([
                     'Content-Type' => "application/json",
