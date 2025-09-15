@@ -17,6 +17,7 @@ RUN apk add --no-cache \
     gmp-dev \
     oniguruma-dev \
     icu-dev \
+    supervisor \
     libpq \
     libpq-dev \
     && docker-php-ext-install \
@@ -39,6 +40,8 @@ COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
 # Copy your custom Nginx config file into the container
 COPY ./docker/production/nginx/default.conf /etc/nginx/conf.d/default.conf
 
+COPY ./docker/supervisor.conf /etc/supervisor/supervisord.conf
+
 # Copy the entire application directory into the image.
 RUN git config --global --add safe.directory /var/www/html
 
@@ -52,10 +55,6 @@ RUN composer update
 
 RUN npm install && npm run build
 
-RUN yes | php artisan migrate
-
-RUN php artisan optimize:clear
-
 USER www-data
 
-CMD ["php-fpm"]
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf", "-n"]
