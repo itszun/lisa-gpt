@@ -31,6 +31,9 @@ class CreateHandler extends Handlers {
 
         $model->status = 1;
         $model->fill($request->all());
+        if(empty($model->status)) {
+            $model->status = 1;
+        }
 
         $model->save();
         $model->feed();

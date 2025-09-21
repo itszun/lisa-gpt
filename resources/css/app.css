@@ -2,3 +2,47 @@
 @tailwind components;
 @tailwind utilities;
 @tailwind variants;
+
+
+#chat-screen pre {
+    overflow: auto;
+    background: #bbb;
+    padding: 1em;
+    overflow: auto;
+    margin: 1em 0;
+    font-size: small;
+}
+
+#chat-screen hr {
+    margin: 1em 0;
+    background: #ccc;
+    height: 2px;
+}
+
+#chat-screen code {
+    background: #bfbfbf;
+    font-size: small;
+    color: #2f2f2f;
+    border-radius: 5px;
+    padding: .2em .4em;
+    margin-right: .2em;
+}
+
+#chat-screen ol, #chat-screen ul{
+    margin: 1em 0;
+}
+
+#chat-screen h1 {
+    font-size: 1.3em;
+    font-weight: bold;
+}
+
+#chat-screen h2 {
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+#chat-screen h3 {
+    font-size: 1.1em;
+    font-weight: bold;
+}

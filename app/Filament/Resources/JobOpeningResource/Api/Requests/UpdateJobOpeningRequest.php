@@ -22,8 +22,8 @@ class UpdateJobOpeningRequest extends FormRequest
     public function rules(): array
     {
         return [
-			'company_id' => 'required',
-			'title' => 'required',
+			'company_id' => 'nullable|string',
+			'title' => 'nullable|string',
 			'body' => 'nullable|string',
 			'due_date' => 'nullable|date',
 			'status' => 'nullable|integer',

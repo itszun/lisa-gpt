@@ -52,10 +52,12 @@ class UserResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->sortable()
+                    ->copyable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('email')
                     ->sortable()
-                    ->searchable(),
+                    ->searchable()
+                    ->copyable(),
                 Tables\Columns\TextColumn::make('roles.name')
                     ->sortable()
                     ->searchable(),

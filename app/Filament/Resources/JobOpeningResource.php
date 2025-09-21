@@ -114,6 +114,7 @@ class JobOpeningResource extends Resource
                         ->openUrlInNewTab()
                         ->icon('heroicon-m-envelope'),
                     Tables\Actions\Action::make("Feed to VectorDB")
+                        ->label("Feed to VectorDB")
                         ->action(function(JobOpening $record) {
                             $record->feed();
                             if (! $record) {

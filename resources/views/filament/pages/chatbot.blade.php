@@ -67,7 +67,7 @@
             </div>
         </div>
 
-        <div class="flex-1 flex flex-col rounded-lg bg-white shadow dark:bg-gray-800">
+        <div id="chat-screen" class="flex-1 flex flex-col rounded-lg bg-white shadow dark:bg-gray-800">
             <div class="flex-1 overflow-y-auto p-4 space-y-4" x-ref="messagesContainer">
                 <template x-if="messages.length === 0">
                     <div class="text-center text-gray-400 italic mt-8">Start a new conversation with LISA.</div>
