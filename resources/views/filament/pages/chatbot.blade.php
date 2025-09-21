@@ -1,4 +1,6 @@
 <x-filament-panels::page>
+    @livewire('database-notifications')
+
     <div x-data="chatApp(
         '{{ $user_id }}'
     )" class="h-[calc(100vh-12rem)] flex gap-4">

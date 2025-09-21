@@ -24,6 +24,12 @@ class ViewJobOpening extends ViewRecord
     {
         return [
             Actions\EditAction::make(),
+            Actions\Action::make('evaluate')
+                ->label("Evaluate Process")
+                ->action(function(JobOpening $model) {
+                    $eval = $model->evaluateOpeningProcess();
+                    $eval['status'];
+                })
         ];
     }
 

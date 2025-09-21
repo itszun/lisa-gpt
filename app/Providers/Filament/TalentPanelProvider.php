@@ -29,7 +29,7 @@ class TalentPanelProvider extends PanelProvider
             ->id('talent')
             ->path('talent')
             ->login()
-            ->spa()
+            ->databaseNotifications()
             ->colors([
                 'primary' => Color::Emerald,
             ])
