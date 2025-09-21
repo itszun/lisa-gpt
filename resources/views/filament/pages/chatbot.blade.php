@@ -59,7 +59,7 @@
                             'bg-primary-500 text-gray-900 dark:bg-primary-500 dark:text-gray-200' :
                                 'bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-gray-200'">
                             <p x-html="MarkedParse(message.content)"></p>
-                            <div class="text-xs mt-1 opacity-75" x-text="Timestamp(message.timestamp)"></div>
+                            {{-- <div class="text-xs mt-1 opacity-75" x-text="Timestamp(message.timestamp)"></div> --}}
                         </div>
 
                     </div>

@@ -79,12 +79,8 @@ class CandidateResource extends Resource
                     ->label('Job Opening')
                     ->searchable()
                     ->sortable(),
+
                 Tables\Columns\TagsColumn::make('status')
-                    // ->getStateUsing(fn ($record) => $record->status == 1 ? ['Active'] : ['Inactive'])
-                    // ->colors([
-                    //     'success' => fn ($state) => in_array('Active', $state),
-                    //     'danger' => fn ($state) => in_array('Inactive', $state),
-                    // ])
                     ->getStateUsing(fn ($record) => match ($record->status) {
                             1 => 'Draft',
                             2 => 'Scouting',
@@ -112,18 +108,22 @@ class CandidateResource extends Resource
                     ])
                     ->sortable()
                     ->searchable(),
+                Tables\Columns\TextColumn::make('chat_user_id')
+                    ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('session_id')
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('regist_at')
                     ->date(fn ($record) => $record->regist_at ? 'd-m-Y H:i' : null)
                     ->searchable()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('interview_schedule')
-                    ->date(fn ($record) => $record->interview_schedule ? 'd-m-Y H:i' : null)
+                    ->sortable()
+                    ,
+                Tables\Columns\TextColumn::make('last_feed_at')
+                    ->date(fn ($record) => $record->last_feed_at ? 'd-m-Y H:i' : '-')
                     ->searchable()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('notified_at')
-                    ->date(fn ($record) => $record->notified_at ? 'd-m-Y H:i' : null)
-                    ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ,
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('talent_id')
@@ -133,6 +133,8 @@ class CandidateResource extends Resource
                 Tables\Filters\SelectFilter::make('job_opening_id')
                     ->relationship('jobOpening', 'title')
                     ->searchable()
+                    ->preload(),
+                Tables\Filters\SelectFilter::make('last_feed_at')
                     ->preload(),
                 Tables\Filters\SelectFilter::make('status')
                     ->options([
@@ -199,9 +201,28 @@ class CandidateResource extends Resource
                     }),
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\ActionGroup::make([
+                    Tables\Actions\ViewAction::make(),
+                    Tables\Actions\EditAction::make(),
+                    Tables\Actions\DeleteAction::make(),
+                    Tables\Actions\Action::make('See Talent')
+                        ->url(fn (Candidate $record): string => route('filament.admin.resources.talent.view', $record->talent_id))
+                        ->openUrlInNewTab()
+                        ->icon('heroicon-m-user-group'),
+                    Tables\Actions\Action::make('See Job Opening')
+                        ->url(fn (Candidate $record): string => route('filament.admin.resources.job-openings.view', $record->job_opening_id))
+                        ->openUrlInNewTab()
+                        ->icon('heroicon-m-envelope'),
+                    Tables\Actions\Action::make('feed', "Feed to VectorDB")
+                        ->action(function(Candidate $record) {
+                            $record->feed();
+                            if (! $record) {
+                                return false;
+                            }
+                            return true;
+                        })
+                        ->icon('heroicon-m-bars-arrow-up'),
+                ])
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

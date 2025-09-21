@@ -27,11 +27,13 @@ class CreateHandler extends Handlers {
      */
     public function handler(CreateCandidateRequest $request)
     {
+        //  @var Candidate $model
         $model = new (static::getModel());
 
         $model->fill($request->all());
 
         $model->save();
+        $model->feed();
 
         return static::sendSuccessResponse($model, "Successfully Create Resource");
     }

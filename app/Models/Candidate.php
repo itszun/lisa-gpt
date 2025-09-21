@@ -64,6 +64,18 @@ class Candidate extends Model
         return Arr::dot($item);
     }
 
+    public function feed()
+    {
+        $fodder = $this->toFodder();
+        Http::withHeaders([
+            'Content-Type' => "application/json",
+            'Accept' => "application/json",
+        ])->post(config('chatbot.host')."/api/feeder/candidates", [
+            'data' => [$fodder]
+        ]);
+        $this->fresh()->touch("last_feed_at");
+    }
+
 
     public static function feedAll()
     {

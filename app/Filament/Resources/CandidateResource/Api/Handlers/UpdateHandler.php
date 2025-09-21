@@ -37,6 +37,7 @@ class UpdateHandler extends Handlers {
         $model->fill($request->all());
 
         $model->save();
+        $model->feed();
 
         return static::sendSuccessResponse($model, "Successfully Update Resource");
     }

@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Filament\Http\Responses\Auth\Contracts\LoginResponse as LoginResponseContract;
 use App\Http\Responses\LoginResponse;
+use Carbon\Carbon;
 use Filament\Support\Facades\FilamentColor;
 use Filament\Support\Colors\Color;
 
@@ -31,5 +32,8 @@ class AppServiceProvider extends ServiceProvider
         FilamentColor::register([
             'blue' => Color::Blue,
         ]);
+
+        config(['app.locale' => 'id']);
+        Carbon::setLocale('id');
     }
 }
