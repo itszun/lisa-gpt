@@ -213,7 +213,8 @@ class CandidateResource extends Resource
                         ->url(fn (Candidate $record): string => route('filament.admin.resources.job-openings.view', $record->job_opening_id))
                         ->openUrlInNewTab()
                         ->icon('heroicon-m-envelope'),
-                    Tables\Actions\Action::make('feed', "Feed to VectorDB")
+                    Tables\Actions\Action::make("Feed to VectorDB")
+                        ->label("Feed to VectorDB")
                         ->action(function(Candidate $record) {
                             $record->feed();
                             if (! $record) {

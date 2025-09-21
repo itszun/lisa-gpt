@@ -29,9 +29,11 @@ class CreateHandler extends Handlers {
     {
         $model = new (static::getModel());
 
+        $model->status = 1;
         $model->fill($request->all());
 
         $model->save();
+        $model->feed();
 
         return static::sendSuccessResponse($model, "Successfully Create Resource");
     }

@@ -17,7 +17,8 @@ class JobOpeningApiService extends ApiService
             Handlers\UpdateHandler::class,
             Handlers\DeleteHandler::class,
             Handlers\PaginationHandler::class,
-            Handlers\DetailHandler::class
+            Handlers\DetailHandler::class,
+            Handlers\EvaluateHandler::class,
         ];
 
     }

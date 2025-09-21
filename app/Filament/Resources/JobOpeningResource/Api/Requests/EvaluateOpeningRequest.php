@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Filament\Resources\CompanyResource\Api\Requests;
+namespace App\Filament\Resources\JobOpeningResource\Api\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class CreateCompanyRequest extends FormRequest
+class EvaluateOpeningRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,9 +22,7 @@ class CreateCompanyRequest extends FormRequest
     public function rules(): array
     {
         return [
-			'name' => 'required',
-			'description' => 'nullable|string',
-			'status' => 'nullable|integer'
+			'job_opening_id' => 'required',
 		];
     }
 }

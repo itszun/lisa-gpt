@@ -67,6 +67,11 @@ class JobOpeningResource extends Resource
                     ->date('d-m-Y')
                     ->sortable()
                     ->searchable(),
+                Tables\Columns\TextColumn::make('last_feed_at')
+                    ->date(fn ($record) => $record->last_feed_at ? 'd-m-Y H:i' : '-')
+                    ->searchable()
+                    ->sortable()
+                    ,
                 Tables\Columns\TagsColumn::make('status')
                     ->getStateUsing(fn ($record) => $record->status == 1 ? ['Active'] : ['Inactive'])
                     ->colors([
@@ -100,9 +105,24 @@ class JobOpeningResource extends Resource
                     ]),
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\ActionGroup::make([
+                    Tables\Actions\ViewAction::make(),
+                    Tables\Actions\EditAction::make(),
+                    Tables\Actions\DeleteAction::make(),
+                    Tables\Actions\Action::make('See Company')
+                        ->url(fn (JobOpening $record): string => route('filament.admin.resources.companies.view', $record->company_id))
+                        ->openUrlInNewTab()
+                        ->icon('heroicon-m-envelope'),
+                    Tables\Actions\Action::make("Feed to VectorDB")
+                        ->action(function(JobOpening $record) {
+                            $record->feed();
+                            if (! $record) {
+                                return false;
+                            }
+                            return true;
+                        })
+                        ->icon('heroicon-m-bars-arrow-up'),
+                ])
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

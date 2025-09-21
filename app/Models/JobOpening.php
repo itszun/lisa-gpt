@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Arr;
@@ -47,6 +48,17 @@ class JobOpening extends Model
         }
     }
 
+    public static function boot()
+    {
+        static::created(function(JobOpening $model) {
+            Notification::make()
+                ->title('Saved successfully')
+                ->success()
+                ->send();
+        });
+        return parent::boot();
+    }
+
     public function getCandidateIdsAttribute() {
         return implode(", ", $this->candidates->reduce(fn($acc, $i) => array_merge($acc, [$i->id]), []));
     }
@@ -83,5 +95,35 @@ class JobOpening extends Model
                 'data' => $records
             ]);
         });
+    }
+
+    public function feed()
+    {
+        $item = $this->toFodder();
+        Http::withHeaders([
+            'Content-Type' => "application/json",
+            'Accept' => "application/json",
+        ])->post(config('chatbot.host')."/api/feeder/job_openings", [
+            'data' => [$item]
+        ]);
+        $this->fresh()->touch("last_feed_at");
+    }
+
+    public function evaluateOpeningProcess()
+    {
+        $status = $this->status;
+
+        $q =  $this->candidates();
+        $draft = $q->where('status', 1)->count();
+        $scouting = $q->where('status', 2)->count();;
+        $screening = $q->where('status', 100)->count();;
+        $interview =  $q->where('status', 101)->count();
+
+        if($interview > 0) {
+            $status = 101;
+            $this->update(["status" => $status]);
+        }
+
+        return compact('draft', 'scouting', 'screening', 'interview', 'status');
     }
 }
