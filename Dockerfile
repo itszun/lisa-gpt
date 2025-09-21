@@ -1,61 +1,39 @@
-# Use a lightweight Debian-based image for consistency and ease of use.
+# Pake image PHP terbaru dengan FPM dan alpine.
 FROM php:8.3-fpm-alpine
 
-# Set the working directory
+# Install dependency sistem yang dibutuhkan oleh PHP dan Laravel.
+RUN apk add --no-cache \
+    nginx \
+    postgresql-dev \
+    supervisor \
+    icu-dev \
+    libzip-dev \
+    && docker-php-ext-install \
+    pdo_pgsql \
+    pdo \
+    intl \
+    zip \
+    && rm -rf /var/cache/apk/*
+
+# Gunakan image composer untuk menginstal dependensi (Multi-Stage Build)
+COPY --from=composer/composer:latest /usr/bin/composer /usr/local/bin/composer
+
+# Pindah ke workdir aplikasi.
 WORKDIR /var/www/html
 
-# Install required dependencies
-RUN apk add --no-cache \
-    git \
-    nodejs \
-    npm \
-    libzip-dev \
-    libjpeg-turbo-dev \
-    libpng-dev \
-    libwebp-dev \
-    libxml2-dev \
-    gmp-dev \
-    oniguruma-dev \
-    icu-dev \
-    libpq \
-    libpq-dev \
-    && docker-php-ext-install \
-    zip \
-    pdo \
-    pdo_pgsql \
-    gd \
-    mbstring \
-    gmp \
-    exif \
-    bcmath \
-    xml \
-    intl \
-    && rm -rf /tmp/*
 
-# Install Composer from URL (cara yang lebih disarankan)
-# Note: Ini lebih baik daripada menggunakan curl raw installer
-COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
+# Salin semua file dari folder aplikasi lokal ke dalam container.
+COPY . .
 
-# Copy your custom Nginx config file into the container
-COPY ./docker/production/nginx/default.conf /etc/nginx/conf.d/default.conf
+RUN composer install --optimize-autoloader
 
-# Copy the entire application directory into the image.
-RUN git config --global --add safe.directory /var/www/html
+# Konfigurasi dan setup lainnya seperti sebelumnya
+COPY ./docker/nginx/nginx.conf /etc/nginx/conf.d/default.conf
+COPY ./docker/supervisord.conf /etc/supervisor/supervisord.conf
 
-COPY . /var/www/html
+RUN chown -R www-data:www-data storage bootstrap/cache \
+    && chmod -R 775 storage bootstrap/cache
 
-# Set permissions and ownership for the application
-RUN chmod -R 775 /var/www/html/storage
-RUN chmod -R 775 /var/www/html/bootstrap/cache
+EXPOSE 80
 
-RUN composer update
-
-RUN npm install && npm run build
-
-RUN yes | php artisan migrate
-
-RUN php artisan optimize:clear
-
-USER www-data
-
-CMD ["php-fpm"]
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf", "php artisan starter:init --seed --feed"]
